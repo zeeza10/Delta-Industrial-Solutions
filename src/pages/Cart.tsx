@@ -4,19 +4,20 @@
  */
 
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { PageContainer, SectionHeading, PrimaryButton, SecondaryButton } from '../components/ui/Base';
 import { Breadcrumbs, PriceDisplay } from '../components/ui/Display';
 import { QuantitySelector } from '../components/ui/Forms';
 import { useStore } from '../context/StoreContext';
-import { Trash2, ArrowLeft, ShoppingBag, ShieldCheck, AlertCircle, FileText } from 'lucide-react';
+import { Trash2, ArrowLeft, ShoppingBag, ShieldCheck, AlertCircle, FileText, CheckCircle2 } from 'lucide-react';
 import { EmptyState } from '../components/ui/States';
 import { SEO } from '../components/common/SEO';
 import { CheckoutModal } from '../components/cart/CheckoutModal';
 import { generateQuotationPDF } from '../utils/pdfExport';
 
 export const Cart: React.FC = () => {
-  const { cart, removeFromCart, updateCartQuantity, cartTotal, clearCart } = useStore();
+  const navigate = useNavigate();
+  const { cart, removeFromCart, updateCartQuantity, cartTotal, clearCart, lastOrder, setLastOrder } = useStore();
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
 
   const breadcrumbs = [
@@ -25,6 +26,72 @@ export const Cart: React.FC = () => {
   ];
 
   if (cart.length === 0) {
+    if (lastOrder) {
+      return (
+        <PageContainer>
+          <SEO title="Order Booked Successfully | Delta Industrial" description="Your industrial procurement order has been successfully booked." />
+          <Breadcrumbs items={breadcrumbs} className="mb-8" />
+          
+          <div className="max-w-2xl mx-auto bg-[#0b0f19] border border-cyan-500/30 rounded-2xl p-6 sm:p-10 shadow-[0_0_50px_rgba(0,0,0,0.9)] font-mono text-center space-y-6">
+            <div className="w-20 h-20 bg-cyan-500/10 border border-cyan-500/40 rounded-full flex items-center justify-center mx-auto text-cyan-400 shadow-[0_0_25px_rgba(0,240,255,0.4)]">
+              <CheckCircle2 className="w-10 h-10" />
+            </div>
+
+            <div className="space-y-2">
+              <span className="text-xs font-bold text-cyan-400 uppercase tracking-widest text-glow-cyan">YOUR ORDER IS BOOKED</span>
+              <h1 className="text-2xl sm:text-3xl font-extrabold text-white">Reference #{lastOrder.reference}</h1>
+              <p className="text-xs text-slate-300 max-w-md mx-auto font-sans">
+                Your order has been officially booked in the Delta Industrial Solutions Private Limited dispatch system on {lastOrder.date}.
+              </p>
+            </div>
+
+            <div className="p-4 bg-[#07090e] border border-cyan-500/20 rounded-xl text-left text-xs space-y-3">
+              <div className="flex justify-between border-b border-cyan-500/20 pb-2">
+                <span className="text-slate-400">Total Order Amount:</span>
+                <PriceDisplay amount={lastOrder.total} className="text-cyan-400 font-bold" />
+              </div>
+              <div className="flex justify-between border-b border-cyan-500/20 pb-2">
+                <span className="text-slate-400">Items Ordered:</span>
+                <span className="text-white font-medium">{lastOrder.items.length} SKU(s)</span>
+              </div>
+              <div className="space-y-1 pt-1">
+                <span className="text-[10px] text-cyan-400 uppercase tracking-widest font-bold">Ordered Products:</span>
+                <div className="max-h-32 overflow-y-auto custom-scrollbar space-y-1 pr-1">
+                  {lastOrder.items.map((it, idx) => (
+                    <div key={idx} className="flex justify-between text-slate-300 text-[11px] border-b border-white/5 pb-1">
+                      <span className="truncate max-w-[220px]">{it.product.name} (x{it.quantity})</span>
+                      <PriceDisplay amount={it.product.price * it.quantity} className="text-cyan-400" />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
+              <PrimaryButton 
+                onClick={() => {
+                  setLastOrder(null);
+                  navigate('/account?tab=orders');
+                }}
+                className="w-full sm:w-auto px-6 h-12 text-xs uppercase tracking-wider"
+              >
+                View Account Orders
+              </PrimaryButton>
+              <SecondaryButton 
+                onClick={() => {
+                  setLastOrder(null);
+                  navigate('/products');
+                }}
+                className="w-full sm:w-auto px-6 h-12 text-xs uppercase tracking-wider"
+              >
+                Start New Order / Browse
+              </SecondaryButton>
+            </div>
+          </div>
+        </PageContainer>
+      );
+    }
+
     return (
       <PageContainer>
         <SEO title="Shopping Cart | Delta Industrial" description="Review items selected for your industrial electrical order or quote." />
@@ -166,4 +233,3 @@ export const Cart: React.FC = () => {
     </PageContainer>
   );
 };
-

@@ -22,6 +22,8 @@ interface StoreContextType {
   clearQuote: () => void;
   cartTotal: number;
   cartCount: number;
+  lastOrder: { reference: string; items: CartItem[]; total: number; date: string } | null;
+  setLastOrder: React.Dispatch<React.SetStateAction<{ reference: string; items: CartItem[]; total: number; date: string } | null>>;
 }
 
 const StoreContext = createContext<StoreContextType | undefined>(undefined);
@@ -41,6 +43,16 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       return [];
     } catch {
       return [];
+    }
+  });
+
+  // Last successful order for cart success state
+  const [lastOrder, setLastOrder] = useState<{ reference: string; items: CartItem[]; total: number; date: string } | null>(() => {
+    try {
+      const saved = sessionStorage.getItem('di_last_order');
+      return saved ? JSON.parse(saved) : null;
+    } catch {
+      return null;
     }
   });
 
@@ -76,6 +88,17 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       console.error('Failed to save cart to localStorage', e);
     }
   }, [cart]);
+
+  // Persist lastOrder
+  useEffect(() => {
+    try {
+      if (lastOrder) {
+        sessionStorage.setItem('di_last_order', JSON.stringify(lastOrder));
+      } else {
+        sessionStorage.removeItem('di_last_order');
+      }
+    } catch (e) {}
+  }, [lastOrder]);
 
   // Persist wishlist
   useEffect(() => {
@@ -245,7 +268,8 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       addToCart, removeFromCart, updateCartQuantity, clearCart,
       toggleWishlist, isInWishlist,
       addToQuote, removeFromQuote, updateQuoteQuantity, updateQuoteNotes, clearQuote,
-      cartTotal, cartCount
+      cartTotal, cartCount,
+      lastOrder, setLastOrder
     }}>
       {children}
     </StoreContext.Provider>
@@ -259,5 +283,3 @@ export const useStore = () => {
   }
   return context;
 };
-
-
