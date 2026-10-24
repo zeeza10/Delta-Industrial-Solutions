@@ -1,0 +1,368 @@
+import React from 'react';
+import { Link, NavLink, useNavigate } from 'react-router-dom';
+import { 
+  ShoppingBag, 
+  Search, 
+  Menu, 
+  X, 
+  User, 
+  Heart, 
+  ClipboardList, 
+  ChevronDown,
+  LayoutGrid,
+  Settings,
+  Sparkles
+} from 'lucide-react';
+import { AnnouncementBar } from './AnnouncementBar';
+import { SearchAutocomplete } from './SearchAutocomplete';
+import { MegaMenu } from './MegaMenu';
+import { MobileMenu } from './MobileMenu';
+import { useStore } from '../../context/StoreContext';
+import { useAuth } from '../../context/AuthContext';
+import { Logo3D } from '../common/3DLogo';
+
+export const Header: React.FC = () => {
+  const navigate = useNavigate();
+  const { user, profile, isAdmin, signOut, openAuthModal } = useAuth();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
+  const [isMegaMenuOpen, setIsMegaMenuOpen] = React.useState(false);
+  const [isSearchFocused, setIsSearchFocused] = React.useState(false);
+  const [searchQuery, setSearchQuery] = React.useState('');
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = React.useState('');
+  
+  const { cart, wishlist, quotes, cartTotal, openCartDrawer } = useStore();
+  
+  React.useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchQuery(searchQuery);
+    }, 250);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+  
+  const searchContainerRef = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (searchContainerRef.current && !searchContainerRef.current.contains(event.target as Node)) {
+        setIsSearchFocused(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+      setIsSearchFocused(false);
+      (e.target as HTMLFormElement).querySelector('input')?.blur();
+    }
+  };
+
+  const handleClearSearch = () => {
+    setSearchQuery('');
+    setIsSearchFocused(false);
+  };
+
+  const navLinks = [
+    { name: 'Products', path: '/products' },
+    { name: 'Brands', path: '/brands' },
+    { name: 'Bulk Quote', path: '/bulk-quote' },
+    { name: 'Project Enquiries', path: '/project-enquiry' },
+    { name: 'Cable Enquiries', path: '/cable-enquiry' },
+    { name: 'About Us', path: '/about' },
+    { name: 'Contact', path: '/contact' },
+  ];
+
+  return (
+    <header className="relative z-[100] w-full">
+      <AnnouncementBar />
+      
+      {/* Main Header Desktop */}
+      <div className="bg-[#07090e]/90 backdrop-blur-md border-b border-cyan-500/20 py-3.5 lg:py-4 relative z-40 shadow-2xl">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between gap-4 lg:gap-8">
+            
+            {/* Zone 1: Logo & Brand Identity */}
+            <Link 
+              to="/" 
+              aria-label="Delta Industrial Solutions Homepage"
+              className="text-xl lg:text-2xl font-bold tracking-tight text-white whitespace-nowrap shrink-0 flex items-center gap-3 group"
+            >
+              <Logo3D className="w-11 h-11" />
+              <div className="flex flex-col -space-y-0.5">
+                <span className="leading-none text-white font-extrabold tracking-wider font-mono">DELTA</span>
+                <span className="text-cyan-400 text-[10px] leading-none tracking-widest uppercase font-mono font-bold text-glow-cyan">INDUSTRIAL SOLUTIONS</span>
+              </div>
+            </Link>
+
+            {/* Zone 2: Sleek Search Bar */}
+            <div ref={searchContainerRef} className="hidden md:flex flex-grow max-w-xl lg:max-w-2xl relative" role="search">
+              <form onSubmit={handleSearchSubmit} className="w-full relative group" action="/search" method="get">
+                <label htmlFor="desktop-search-input" className="sr-only">Search catalog by SKU, part number or product name</label>
+                <input 
+                  id="desktop-search-input"
+                  type="search" 
+                  placeholder="Search 15,000+ industrial parts, SKUs, circuit breakers, or 3D models..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onFocus={() => setIsSearchFocused(true)}
+                  aria-label="Search catalog by SKU, part number or product name"
+                  aria-autocomplete="list"
+                  className="w-full pl-11 pr-24 py-2.5 bg-[#0b0f19]/80 border border-cyan-500/20 rounded-lg text-xs sm:text-sm focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 focus:shadow-[0_0_15px_rgba(0,240,255,0.25)] transition-all font-mono text-slate-100 placeholder:text-slate-500 industrial-input"
+                />
+                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-cyan-400/60 group-focus-within:text-cyan-400 transition-colors" aria-hidden="true" />
+                
+                <div className="absolute right-1.5 top-1/2 -translate-y-1/2 flex items-center gap-1">
+                  {searchQuery && (
+                    <button 
+                      type="button"
+                      onClick={handleClearSearch}
+                      aria-label="Clear search input"
+                      className="p-1 hover:bg-slate-800 rounded text-slate-400 transition-colors"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  )}
+                  <button 
+                    type="submit"
+                    aria-label="Submit search"
+                    className="px-3.5 py-1.5 bg-gradient-to-r from-cyan-500 to-blue-600 text-black text-[11px] font-mono font-bold uppercase tracking-wider rounded hover:shadow-[0_0_12px_rgba(0,240,255,0.5)] transition-all"
+                  >
+                    Search
+                  </button>
+                </div>
+              </form>
+              
+              <SearchAutocomplete 
+                query={debouncedSearchQuery} 
+                isOpen={isSearchFocused} 
+                onClose={() => setIsSearchFocused(false)} 
+              />
+            </div>
+
+            {/* Zone 3: Clearly Defined Iconography Actions */}
+            <div className="flex items-center gap-1 sm:gap-2 lg:gap-3 shrink-0">
+              
+              {/* Account Dropdown */}
+              <div className="hidden sm:flex items-center border-r border-cyan-500/20 pr-2 lg:pr-3 mr-1">
+                {isAdmin && (
+                  <Link 
+                    to="/admin" 
+                    aria-label="Admin Management Panel"
+                    className="flex flex-col items-center gap-1 p-2 text-slate-300 hover:text-cyan-400 transition-colors rounded-md hover:bg-cyan-950/30"
+                  >
+                    <Settings className="w-5 h-5 text-purple-400" aria-hidden="true" />
+                    <span className="text-[9px] font-mono font-bold uppercase tracking-wider text-purple-300">Admin</span>
+                  </Link>
+                )}
+                
+                {user ? (
+                  <div className="relative group">
+                    <button 
+                      aria-label={`User account menu for ${profile?.displayName || user.displayName || 'Customer'}`}
+                      aria-haspopup="true"
+                      className="flex flex-col items-center gap-1 p-2 text-slate-300 hover:text-cyan-400 transition-colors rounded-md hover:bg-cyan-950/30"
+                    >
+                      <User className="w-5 h-5 text-cyan-400" aria-hidden="true" />
+                      <span className="text-[9px] font-mono font-bold uppercase tracking-wider truncate max-w-[70px]">
+                        {profile?.displayName?.split(' ')[0] || user.displayName?.split(' ')[0] || 'Account'}
+                      </span>
+                    </button>
+                    <div className="absolute right-0 top-full pt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible group-focus-within:opacity-100 group-focus-within:visible transition-all duration-150 z-[300] pointer-events-none group-hover:pointer-events-auto group-focus-within:pointer-events-auto">
+                      <div className="bg-[#0b0f19] border border-cyan-500/40 shadow-[0_15px_40px_rgba(0,0,0,0.95)] rounded-xl py-2 w-60 font-mono text-xs backdrop-blur-2xl" role="menu">
+                        <div className="px-4 py-2.5 border-b border-cyan-500/20 bg-cyan-950/40">
+                          <div className="font-bold text-xs text-cyan-400 truncate">{profile?.displayName || user.displayName || 'Customer Account'}</div>
+                          <div className="text-[10px] text-slate-400 truncate">{user.email}</div>
+                        </div>
+                        <div className="py-1">
+                          <Link to="/account?tab=profile" role="menuitem" className="block px-4 py-2 text-slate-300 hover:bg-cyan-500/15 hover:text-cyan-400 transition-colors">Company Profile</Link>
+                          <Link to="/account?tab=enquiries" role="menuitem" className="block px-4 py-2 text-slate-300 hover:bg-cyan-500/15 hover:text-cyan-400 transition-colors">Enquiry History</Link>
+                          <Link to="/account?tab=quotes" role="menuitem" className="block px-4 py-2 text-slate-300 hover:bg-cyan-500/15 hover:text-cyan-400 transition-colors">Quotations & Offers</Link>
+                          <Link to="/account?tab=orders" role="menuitem" className="block px-4 py-2 text-slate-300 hover:bg-cyan-500/15 hover:text-cyan-400 transition-colors">Order Records</Link>
+                        </div>
+                        <div className="border-t border-cyan-500/20 pt-1">
+                          <button 
+                            onClick={() => signOut()}
+                            role="menuitem"
+                            className="w-full text-left px-4 py-2 text-xs font-semibold text-rose-400 hover:bg-rose-500/15 transition-colors cursor-pointer"
+                          >
+                            Sign Out
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="relative group">
+                    <button 
+                      onClick={() => openAuthModal('signin')}
+                      aria-label="Sign in to your account"
+                      aria-haspopup="true"
+                      className="flex flex-col items-center gap-1 p-2 text-slate-300 hover:text-cyan-400 transition-colors rounded-md hover:bg-cyan-950/30"
+                    >
+                      <User className="w-5 h-5 text-cyan-400" aria-hidden="true" />
+                      <span className="text-[9px] font-mono font-bold uppercase tracking-wider">Login</span>
+                    </button>
+                    <div className="absolute right-0 top-full pt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible group-focus-within:opacity-100 group-focus-within:visible transition-all duration-150 z-[300] pointer-events-none group-hover:pointer-events-auto group-focus-within:pointer-events-auto">
+                      <div className="bg-[#0b0f19] border border-cyan-500/40 shadow-[0_15px_40px_rgba(0,0,0,0.95)] rounded-xl py-2 w-56 font-mono text-xs backdrop-blur-2xl" role="menu">
+                        <div className="px-4 py-2 border-b border-cyan-500/20 bg-cyan-950/40 text-[11px] text-cyan-400 font-bold uppercase tracking-wider">
+                          B2B Portal Access
+                        </div>
+                        <div className="p-2 space-y-1">
+                          <button
+                            onClick={() => openAuthModal('signin')}
+                            className="w-full text-left px-3 py-2 rounded text-xs font-bold text-black bg-cyan-400 hover:bg-cyan-300 transition-colors"
+                          >
+                            Sign In
+                          </button>
+                          <button
+                            onClick={() => openAuthModal('signup')}
+                            className="w-full text-left px-3 py-2 rounded text-xs font-medium text-slate-300 hover:bg-cyan-500/15 hover:text-cyan-400 transition-colors"
+                          >
+                            Create B2B Account
+                          </button>
+                          <Link 
+                            to="/bulk-quote" 
+                            className="block px-3 py-2 rounded text-xs text-slate-300 hover:bg-cyan-500/15 hover:text-cyan-400 transition-colors"
+                          >
+                            Track RFQ / Quote
+                          </Link>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Wishlist */}
+                <Link 
+                  to="/wishlist" 
+                  aria-label={`Wishlist with ${wishlist.length} saved products`}
+                  className="flex flex-col items-center gap-1 p-2 text-slate-300 hover:text-cyan-400 transition-colors relative rounded-md hover:bg-cyan-950/30"
+                >
+                  <Heart className="w-5 h-5 text-purple-400" aria-hidden="true" />
+                  <span className="text-[9px] font-mono font-bold uppercase tracking-wider">Wishlist</span>
+                  {wishlist.length > 0 && (
+                    <span className="absolute top-1 right-1 w-4 h-4 bg-cyan-400 text-black text-[9px] font-mono font-bold flex items-center justify-center rounded-full shadow-[0_0_8px_rgba(0,240,255,0.8)]" aria-hidden="true">
+                      {wishlist.length}
+                    </span>
+                  )}
+                </Link>
+
+                {/* Quotes */}
+                <Link 
+                  to="/quotes" 
+                  aria-label={`Project quote requests with ${quotes.length} items`}
+                  className="flex flex-col items-center gap-1 p-2 text-slate-300 hover:text-cyan-400 transition-colors relative rounded-md hover:bg-cyan-950/30"
+                >
+                  <ClipboardList className="w-5 h-5 text-cyan-400" aria-hidden="true" />
+                  <span className="text-[9px] font-mono font-bold uppercase tracking-wider">Quotes</span>
+                  {quotes.length > 0 && (
+                    <span className="absolute top-1 right-1 w-4 h-4 bg-purple-500 text-white text-[9px] font-mono font-bold flex items-center justify-center rounded-full shadow-[0_0_8px_rgba(138,43,226,0.8)]" aria-hidden="true">
+                      {quotes.length}
+                    </span>
+                  )}
+                </Link>
+              </div>
+
+              {/* Cart Drawer Trigger */}
+              <button 
+                onClick={openCartDrawer}
+                aria-label={`Shopping cart with ${cart.length} items totaling ${cartTotal.toFixed(2)} dollars`}
+                className="flex items-center gap-2.5 px-3 py-2 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-black rounded-lg transition-all shadow-[0_0_15px_rgba(0,240,255,0.3)] hover:shadow-[0_0_20px_rgba(0,240,255,0.6)] group focus:outline-none focus:ring-2 focus:ring-cyan-400 font-mono"
+              >
+                <div className="flex flex-col items-end leading-none hidden sm:flex">
+                  <span className="text-[9px] font-bold uppercase tracking-widest text-black/80">CART</span>
+                  <span className="text-xs font-bold font-mono text-black">${cartTotal.toFixed(2)}</span>
+                </div>
+                <div className="relative p-1.5 bg-black/20 rounded group-hover:bg-black/30 transition-colors" aria-hidden="true">
+                  <ShoppingBag className="w-4 h-4 text-black" />
+                  {cart.length > 0 && (
+                    <span className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-purple-600 text-white text-[9px] font-bold flex items-center justify-center rounded-full border border-black shadow-[0_0_6px_rgba(138,43,226,0.8)]">
+                      {cart.length}
+                    </span>
+                  )}
+                </div>
+              </button>
+
+              {/* Mobile Menu Toggle */}
+              <button 
+                className="md:hidden p-2 text-cyan-400 rounded-lg hover:bg-cyan-950/30 focus:outline-none focus:ring-2 focus:ring-cyan-400"
+                onClick={() => setIsMobileMenuOpen(true)}
+                aria-label="Open mobile navigation menu"
+                aria-expanded={isMobileMenuOpen}
+                aria-controls="mobile-navigation-drawer"
+              >
+                <Menu className="w-6 h-6" aria-hidden="true" />
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Navigation Row Desktop */}
+      <nav aria-label="Main Navigation" className="hidden md:block bg-[#07090e]/95 text-white sticky top-0 z-30 border-b border-cyan-500/20 shadow-xl backdrop-blur-md relative font-mono">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-12">
+            
+            {/* Category MegaMenu Trigger */}
+            <div className="h-full">
+              <button 
+                onClick={() => setIsMegaMenuOpen(prev => !prev)}
+                aria-expanded={isMegaMenuOpen}
+                aria-haspopup="true"
+                aria-label="All Categories Mega Menu"
+                className={`flex items-center gap-2.5 px-5 h-full font-bold text-xs sm:text-sm tracking-wide transition-all focus:outline-none focus:ring-2 focus:ring-cyan-400 ${
+                  isMegaMenuOpen ? 'bg-cyan-500 text-black shadow-[0_0_15px_rgba(0,240,255,0.5)]' : 'bg-cyan-950/40 hover:bg-cyan-500/20 text-cyan-400 border-r border-cyan-500/20'
+                }`}
+              >
+                <LayoutGrid className="w-4 h-4" aria-hidden="true" />
+                <span>CATEGORIES</span>
+                <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${isMegaMenuOpen ? 'rotate-180' : ''}`} aria-hidden="true" />
+              </button>
+            </div>
+
+            {/* Links */}
+            <div className="flex items-center gap-1 h-full overflow-x-auto no-scrollbar">
+              {navLinks.map((link) => (
+                <NavLink
+                  key={link.path}
+                  to={link.path}
+                  className={({ isActive }) =>
+                    `px-3.5 h-full flex items-center text-xs font-bold tracking-wide whitespace-nowrap transition-all ${
+                      isActive 
+                        ? 'bg-cyan-500/10 text-cyan-400 border-b-2 border-cyan-400 text-glow-cyan' 
+                        : 'text-slate-300 hover:bg-cyan-500/5 hover:text-cyan-300'
+                    }`
+                  }
+                >
+                  {link.name}
+                </NavLink>
+              ))}
+            </div>
+
+            {/* B2B Technical Support Badge */}
+            <div className="hidden lg:flex items-center gap-2 text-[11px] text-cyan-400/80 font-mono">
+              <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse shadow-[0_0_8px_rgba(0,240,255,0.8)]" />
+              <span className="text-glow-cyan">INDUSTRIAL SUPPORT ONLINE</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Full-width Responsive Mega Menu */}
+        <MegaMenu 
+          isOpen={isMegaMenuOpen} 
+          onClose={() => setIsMegaMenuOpen(false)} 
+        />
+      </nav>
+
+      {/* Mobile Navigation Drawer */}
+      <MobileMenu 
+        isOpen={isMobileMenuOpen} 
+        onClose={() => setIsMobileMenuOpen(false)} 
+      />
+    </header>
+  );
+};
+

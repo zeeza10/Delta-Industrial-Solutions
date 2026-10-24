@@ -1,0 +1,114 @@
+{
+  "entities": {
+    "Product": {
+      "title": "Product",
+      "description": "Industrial electrical product record",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string", "minLength": 3, "maxLength": 200 },
+        "slug": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+        "description": { "type": "string", "maxLength": 5000 },
+        "price": { "type": "number" },
+        "currency": { "type": "string", "pattern": "^[A-Z]{3}$" },
+        "sku": { "type": "string", "maxLength": 50 },
+        "categoryId": { "type": "string" },
+        "brandId": { "type": "string" },
+        "images": { "type": "array" },
+        "specifications": { "type": "object" },
+        "stock": { "type": "number" },
+        "isAvailable": { "type": "boolean" },
+        "tags": { "type": "array" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["name", "slug", "sku", "categoryId", "brandId"]
+    },
+    "Category": {
+      "title": "Category",
+      "description": "Product category taxonomy",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "slug": { "type": "string" },
+        "parentId": { "type": "string" },
+        "description": { "type": "string" },
+        "image": { "type": "string" }
+      },
+      "required": ["name", "slug"]
+    },
+    "Brand": {
+      "title": "Brand",
+      "description": "Manufacturer brand",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "logo": { "type": "string" },
+        "description": { "type": "string" }
+      },
+      "required": ["name"]
+    },
+    "Enquiry": {
+      "title": "Enquiry",
+      "description": "B2B procurement enquiry (Bulk, Project, Cable, or Quote)",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "type": { "type": "string", "enum": ["bulk", "project", "cable", "quote"] },
+        "userId": { "type": "string" },
+        "status": { "type": "string", "enum": ["pending", "reviewing", "quoted", "closed"] },
+        "customerInfo": { "type": "object" },
+        "data": { "type": "object" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["type", "status", "customerInfo", "data"]
+    },
+    "UserProfile": {
+      "title": "User Profile",
+      "description": "Authenticated user profile and role",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "email": { "type": "string" },
+        "displayName": { "type": "string" },
+        "role": { "type": "string", "enum": ["customer", "admin"] },
+        "company": { "type": "string" },
+        "phone": { "type": "string" },
+        "jobTitle": { "type": "string" },
+        "taxId": { "type": "string" },
+        "shippingAddress": { "type": "object" },
+        "billingAddress": { "type": "object" }
+      },
+      "required": ["uid", "email", "role"]
+    }
+  },
+  "firestore": {
+    "/products/{productId}": {
+      "schema": "Product",
+      "description": "Global product catalog"
+    },
+    "/categories/{categoryId}": {
+      "schema": "Category",
+      "description": "Product categories"
+    },
+    "/brands/{brandId}": {
+      "schema": "Brand",
+      "description": "Manufacturer brands"
+    },
+    "/enquiries/{enquiryId}": {
+      "schema": "Enquiry",
+      "description": "Procurement enquiries"
+    },
+    "/users/{userId}": {
+      "schema": "UserProfile",
+      "description": "User profiles and RBAC"
+    },
+    "/admins/{adminId}": {
+      "schema": { "type": "object", "properties": {} },
+      "description": "List of admin UIDs for secure rule validation"
+    }
+  }
+}

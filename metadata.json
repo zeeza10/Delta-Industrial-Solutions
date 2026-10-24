@@ -1,0 +1,6 @@
+{
+  "name": "Delta Industrial Solutions",
+  "description": "Professional industrial electrical e-commerce platform with B2B procurement, user authentication, and administration panel.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
