@@ -96,12 +96,12 @@ export const Header: React.FC = () => {
             <Link 
               to="/" 
               aria-label="Delta Industrial Solutions Homepage"
-              className="text-xl lg:text-2xl font-bold tracking-tight text-white whitespace-nowrap shrink-0 flex items-center gap-3 group"
+              className="text-lg sm:text-xl lg:text-2xl font-bold tracking-tight text-white whitespace-nowrap shrink-0 flex items-center gap-2.5 sm:gap-3 group"
             >
-              <Logo3D className="w-11 h-11" />
+              <Logo3D className="w-9 h-9 sm:w-11 sm:h-11" />
               <div className="flex flex-col -space-y-0.5">
-                <span className="leading-none text-white font-extrabold tracking-wider font-mono">DELTA</span>
-                <span className="text-cyan-400 text-[10px] leading-none tracking-widest uppercase font-mono font-bold text-glow-cyan">INDUSTRIAL SOLUTIONS</span>
+                <span className="leading-none text-white font-extrabold tracking-wider font-mono text-xs sm:text-base">DELTA</span>
+                <span className="text-cyan-400 text-[8px] sm:text-[10px] leading-none tracking-widest uppercase font-mono font-bold text-glow-cyan">INDUSTRIAL SOLUTIONS</span>
               </div>
             </Link>
 
@@ -163,115 +163,118 @@ export const Header: React.FC = () => {
             {/* Zone 3: Quick Actions (Account, Wishlist, Cart) */}
             <div className="flex items-center gap-2 sm:gap-4 shrink-0">
               
-              {/* Account Dropdown / Button */}
-              {user ? (
-                <div className="relative group">
-                  <button 
-                    onClick={() => navigate('/account')}
-                    aria-label="Customer account menu"
-                    className="flex flex-col items-center gap-1 p-2 text-slate-300 hover:text-cyan-400 transition-colors rounded-md hover:bg-cyan-950/30"
-                  >
-                    <User className="w-5 h-5 text-cyan-400" aria-hidden="true" />
-                    <span className="text-[9px] font-mono font-bold uppercase tracking-wider truncate max-w-[70px]">
-                      {profile?.displayName?.split(' ')[0] || user.displayName?.split(' ')[0] || 'Account'}
-                    </span>
-                  </button>
-                  <div className="absolute right-0 top-full pt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible group-focus-within:opacity-100 group-focus-within:visible transition-all duration-150 z-[300] pointer-events-none group-hover:pointer-events-auto group-focus-within:pointer-events-auto">
-                    <div className="bg-[#0b0f19] border border-cyan-500/40 shadow-[0_15px_40px_rgba(0,0,0,0.95)] rounded-xl py-2 w-56 font-mono text-xs backdrop-blur-2xl" role="menu">
-                      <div className="px-4 py-2 border-b border-cyan-500/20 bg-cyan-950/40 text-[11px] text-cyan-400 font-bold uppercase tracking-wider truncate">
-                        {user.email}
-                      </div>
-                      <div className="p-2 space-y-1">
-                        <Link 
-                          to="/account" 
-                          className="block px-3 py-2 rounded text-xs text-slate-300 hover:bg-cyan-500/15 hover:text-cyan-400 transition-colors"
-                        >
-                          Dashboard & Orders
-                        </Link>
-                        {isAdmin && (
+              {/* Account Dropdown / Button (Desktop Only) */}
+              <div className="hidden md:flex items-center">
+                {user ? (
+                  <div className="relative group">
+                    <button 
+                      onClick={() => navigate('/account')}
+                      aria-label="Customer account menu"
+                      className="flex flex-col items-center gap-1 p-2 text-slate-300 hover:text-cyan-400 transition-colors rounded-md hover:bg-cyan-950/30"
+                    >
+                      <User className="w-5 h-5 text-cyan-400" aria-hidden="true" />
+                      <span className="text-[9px] font-mono font-bold uppercase tracking-wider truncate max-w-[70px]">
+                        {profile?.displayName?.split(' ')[0] || user.displayName?.split(' ')[0] || 'Account'}
+                      </span>
+                    </button>
+                    <div className="absolute right-0 top-full pt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible group-focus-within:opacity-100 group-focus-within:visible transition-all duration-150 z-[300] pointer-events-none group-hover:pointer-events-auto group-focus-within:pointer-events-auto">
+                      <div className="bg-[#0b0f19] border border-cyan-500/40 shadow-[0_15px_40px_rgba(0,0,0,0.95)] rounded-xl py-2 w-56 font-mono text-xs backdrop-blur-2xl" role="menu">
+                        <div className="px-4 py-2 border-b border-cyan-500/20 bg-cyan-950/40 text-[11px] text-cyan-400 font-bold uppercase tracking-wider truncate">
+                          {user.email}
+                        </div>
+                        <div className="p-2 space-y-1">
                           <Link 
-                            to="/admin" 
-                            className="block px-3 py-2 rounded text-xs text-cyan-400 bg-cyan-950/30 hover:bg-cyan-950/60 font-bold transition-colors"
+                            to="/account" 
+                            className="block px-3 py-2 rounded text-xs text-slate-300 hover:bg-cyan-500/15 hover:text-cyan-400 transition-colors"
                           >
-                            Admin Console
+                            Dashboard & Orders
                           </Link>
-                        )}
-                        <button
-                          onClick={() => signOut()}
-                          className="w-full text-left px-3 py-2 rounded text-xs text-red-400 hover:bg-red-950/30 transition-colors font-bold"
-                        >
-                          Sign Out
-                        </button>
+                          {isAdmin && (
+                            <Link 
+                              to="/admin" 
+                              className="block px-3 py-2 rounded text-xs text-cyan-400 bg-cyan-950/30 hover:bg-cyan-950/60 font-bold transition-colors"
+                            >
+                              Admin Console
+                            </Link>
+                          )}
+                          <button
+                            onClick={() => signOut()}
+                            className="w-full text-left px-3 py-2 rounded text-xs text-red-400 hover:bg-red-950/30 transition-colors font-bold"
+                          >
+                            Sign Out
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              ) : (
-                <div className="relative group">
-                  <button 
-                    onClick={() => openAuthModal('signin')}
-                    aria-label="Sign in to your account"
-                    aria-haspopup="true"
-                    className="flex flex-col items-center gap-1 p-2 text-slate-300 hover:text-cyan-400 transition-colors rounded-md hover:bg-cyan-950/30"
-                  >
-                    <User className="w-5 h-5 text-cyan-400" aria-hidden="true" />
-                    <span className="text-[9px] font-mono font-bold uppercase tracking-wider">Login</span>
-                  </button>
-                  <div className="absolute right-0 top-full pt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible group-focus-within:opacity-100 group-focus-within:visible transition-all duration-150 z-[300] pointer-events-none group-hover:pointer-events-auto group-focus-within:pointer-events-auto">
-                    <div className="bg-[#0b0f19] border border-cyan-500/40 shadow-[0_15px_40px_rgba(0,0,0,0.95)] rounded-xl py-2 w-56 font-mono text-xs backdrop-blur-2xl" role="menu">
-                      <div className="px-4 py-2 border-b border-cyan-500/20 bg-cyan-950/40 text-[11px] text-cyan-400 font-bold uppercase tracking-wider">
-                        B2B Portal Access
-                      </div>
-                      <div className="p-2 space-y-1">
-                        <button
-                          onClick={() => openAuthModal('signin')}
-                          className="w-full text-left px-3 py-2 rounded text-xs font-bold text-black bg-cyan-400 hover:bg-cyan-300 transition-colors"
-                        >
-                          Sign In
-                        </button>
-                        <button
-                          onClick={() => openAuthModal('register')}
-                          className="w-full text-left px-3 py-2 rounded text-xs font-medium text-slate-300 hover:bg-cyan-500/15 hover:text-cyan-400 transition-colors"
-                        >
-                          Create B2B Account
-                        </button>
-                        <Link 
-                          to="/bulk-quote" 
-                          className="block px-3 py-2 rounded text-xs text-slate-300 hover:bg-cyan-500/15 hover:text-cyan-400 transition-colors"
-                        >
-                          Track RFQ / Quote
-                        </Link>
+                ) : (
+                  <div className="relative group">
+                    <button 
+                      onClick={() => openAuthModal('signin')}
+                      aria-label="Sign in to your account"
+                      aria-haspopup="true"
+                      className="flex flex-col items-center gap-1 p-2 text-slate-300 hover:text-cyan-400 transition-colors rounded-md hover:bg-cyan-950/30"
+                    >
+                      <User className="w-5 h-5 text-cyan-400" aria-hidden="true" />
+                      <span className="text-[9px] font-mono font-bold uppercase tracking-wider">Login</span>
+                    </button>
+                    <div className="absolute right-0 top-full pt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible group-focus-within:opacity-100 group-focus-within:visible transition-all duration-150 z-[300] pointer-events-none group-hover:pointer-events-auto group-focus-within:pointer-events-auto">
+                      <div className="bg-[#0b0f19] border border-cyan-500/40 shadow-[0_15px_40px_rgba(0,0,0,0.95)] rounded-xl py-2 w-56 font-mono text-xs backdrop-blur-2xl" role="menu">
+                        <div className="px-4 py-2 border-b border-cyan-500/20 bg-cyan-950/40 text-[11px] text-cyan-400 font-bold uppercase tracking-wider">
+                          B2B Portal Access
+                        </div>
+                        <div className="p-2 space-y-1">
+                          <button
+                            onClick={() => openAuthModal('signin')}
+                            className="w-full text-left px-3 py-2 rounded text-xs font-bold text-black bg-cyan-400 hover:bg-cyan-300 transition-colors"
+                          >
+                            Sign In
+                          </button>
+                          <button
+                            onClick={() => openAuthModal('register')}
+                            className="w-full text-left px-3 py-2 rounded text-xs font-medium text-slate-300 hover:bg-cyan-500/15 hover:text-cyan-400 transition-colors"
+                          >
+                            Create B2B Account
+                          </button>
+                          <Link 
+                            to="/bulk-quote" 
+                            className="block px-3 py-2 rounded text-xs text-slate-300 hover:bg-cyan-500/15 hover:text-cyan-400 transition-colors"
+                          >
+                            Track RFQ / Quote
+                          </Link>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              )}
-
-              {/* Wishlist */}
-              <Link 
-                to="/wishlist" 
-                aria-label={`Wishlist with ${wishlist.length} saved products`}
-                className="flex flex-col items-center gap-1 p-2 text-slate-300 hover:text-cyan-400 transition-colors relative rounded-md hover:bg-cyan-950/30"
-              >
-                <Heart className="w-5 h-5 text-purple-400" aria-hidden="true" />
-                <span className="text-[9px] font-mono font-bold uppercase tracking-wider">Wishlist</span>
-                {wishlist.length > 0 && (
-                  <span className="absolute top-1 right-1 w-4 h-4 bg-cyan-400 text-black text-[9px] font-mono font-bold flex items-center justify-center rounded-full shadow-[0_0_8px_rgba(0,240,255,0.8)]" aria-hidden="true">
-                    {wishlist.length}
-                  </span>
                 )}
-              </Link>
+              </div>
+
+              {/* Wishlist (Desktop Only) */}
+              <div className="hidden md:flex items-center">
+                <Link 
+                  to="/wishlist" 
+                  aria-label={`Wishlist with ${wishlist.length} saved products`}
+                  className="flex flex-col items-center gap-1 p-2 text-slate-300 hover:text-cyan-400 transition-colors relative rounded-md hover:bg-cyan-950/30"
+                >
+                  <Heart className="w-5 h-5 text-purple-400" aria-hidden="true" />
+                  <span className="text-[9px] font-mono font-bold uppercase tracking-wider">Wishlist</span>
+                  {wishlist.length > 0 && (
+                    <span className="absolute top-1 right-1 w-4 h-4 bg-cyan-400 text-black text-[9px] font-mono font-bold flex items-center justify-center rounded-full shadow-[0_0_8px_rgba(0,240,255,0.8)]" aria-hidden="true">
+                      {wishlist.length}
+                    </span>
+                  )}
+                </Link>
+              </div>
 
               {/* Cart Drawer Trigger */}
               <button 
                 onClick={openCartDrawer}
                 aria-label={`Shopping cart with ${cart.length} items`}
-                className="flex flex-col items-center gap-1 p-2 text-slate-300 hover:text-cyan-400 transition-colors relative rounded-md hover:bg-cyan-950/30"
+                className="relative p-2.5 bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-400/60 rounded-xl flex items-center justify-center text-cyan-400 shadow-[0_0_15px_rgba(0,240,255,0.3)] transition-all cursor-pointer"
               >
                 <ShoppingBag className="w-5 h-5 text-cyan-400" aria-hidden="true" />
-                <span className="text-[9px] font-mono font-bold uppercase tracking-wider">Cart</span>
                 {cart.length > 0 && (
-                  <span className="absolute top-1 right-1 w-4 h-4 bg-cyan-400 text-black text-[9px] font-mono font-bold flex items-center justify-center rounded-full shadow-[0_0_8px_rgba(0,240,255,0.8)]" aria-hidden="true">
+                  <span className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-purple-600 text-white text-[10px] font-mono font-bold flex items-center justify-center rounded-full shadow-[0_0_10px_rgba(138,43,226,0.8)] border border-cyan-300" aria-hidden="true">
                     {cart.length}
                   </span>
                 )}
@@ -281,9 +284,9 @@ export const Header: React.FC = () => {
               <button 
                 onClick={() => setIsMobileMenuOpen(prev => !prev)}
                 aria-label="Toggle mobile menu"
-                className="md:hidden p-2 text-slate-300 hover:text-cyan-400 transition-colors rounded-md hover:bg-cyan-950/30"
+                className="lg:hidden shrink-0 flex items-center justify-center p-2.5 bg-cyan-950/80 border border-cyan-500/60 text-cyan-400 hover:bg-cyan-500 hover:text-black transition-all rounded-xl shadow-[0_0_15px_rgba(0,240,255,0.4)] cursor-pointer z-50"
               >
-                {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+                {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
               </button>
 
             </div>

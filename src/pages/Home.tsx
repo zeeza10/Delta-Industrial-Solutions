@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { 
   ArrowRight, 
   ChevronRight, 
+  ChevronLeft,
   Zap, 
   Mail, 
   Briefcase,
@@ -26,6 +27,7 @@ import { Product, Brand } from '../types';
 import { SEO } from '../components/common/SEO';
 import { Hero3DCanvas } from '../components/3d/Hero3DCanvas';
 import { BRANDS } from '../data/brands';
+import { BrandCarousel } from '../components/common/BrandCarousel';
 
 export const Home: React.FC = () => {
   const navigate = useNavigate();
@@ -33,31 +35,78 @@ export const Home: React.FC = () => {
   const [newsletterEmail, setNewsletterEmail] = useState('');
   const [newsletterSubscribed, setNewsletterSubscribed] = useState(false);
 
+
+
   useEffect(() => {
     const fetchFeatured = async () => {
+      const defaultProducts = [
+        {
+          id: 'p1',
+          name: 'Molded Case Circuit Breaker - T5 630A High Capacity',
+          categoryId: 'circuit-protection',
+          price: 849.00,
+          currency: 'USD',
+          images: ['/src/assets/images/industrial_circuit_breaker_1792848534487.jpg'],
+          sku: 'MCCB-T5-630',
+          slug: 'mccb-t5-630',
+          brandId: 'elecsynchron',
+          isAvailable: true,
+          tags: ['featured']
+        },
+        {
+          id: 'p2',
+          name: 'Industrial Programmable Logic Controller S7-1500',
+          categoryId: 'industrial-automation',
+          price: 2450.00,
+          currency: 'USD',
+          images: ['/src/assets/images/prod_industrial_plc_1792851607627.jpg'],
+          sku: 'PLC-S7-1500',
+          slug: 'plc-s7-1500',
+          brandId: 'siemens',
+          isAvailable: true,
+          tags: ['featured']
+        },
+        {
+          id: 'p3',
+          name: 'Heavy-Duty XLPE Armoured Power Cable 300m Reel',
+          categoryId: 'cables-wires',
+          price: 1890.00,
+          currency: 'USD',
+          images: ['/src/assets/images/industrial_cable_reel_1792848534820.jpg'],
+          sku: 'CBL-XLPE-300',
+          slug: 'cbl-xlpe-300',
+          brandId: 'prysmian',
+          isAvailable: true,
+          tags: ['featured']
+        },
+        {
+          id: 'p4',
+          name: 'High-Lumen Industrial Explosion-Proof LED Floodlight',
+          categoryId: 'lighting-fixtures',
+          price: 420.00,
+          currency: 'USD',
+          images: ['/src/assets/images/prod_led_floodlight_1792851607088.jpg'],
+          sku: 'LED-FL-400W',
+          slug: 'led-fl-400w',
+          brandId: 'schneider',
+          isAvailable: true,
+          tags: ['featured']
+        }
+      ];
+
       try {
         const products = await getFeaturedProducts(4);
-        if (products.length > 0) {
+        if (products.length >= 4) {
           setFeaturedProducts(products);
+        } else if (products.length > 0) {
+          const combined = [...products, ...defaultProducts.slice(products.length)];
+          setFeaturedProducts(combined as any);
         } else {
-          setFeaturedProducts([
-            {
-              id: 'p1',
-              name: 'Molded Case Circuit Breaker - T5 630A High Capacity',
-              categoryId: 'circuit-protection',
-              price: 849.00,
-              currency: 'USD',
-              images: ['/src/assets/images/industrial_circuit_breaker_1792848534487.jpg'],
-              sku: 'MCCB-T5-630',
-              slug: 'mccb-t5-630',
-              brandId: 'elecsynchron',
-              isAvailable: true,
-              tags: ['featured']
-            } as any,
-          ]);
+          setFeaturedProducts(defaultProducts as any);
         }
       } catch (error) {
         console.error('Error fetching featured products:', error);
+        setFeaturedProducts(defaultProducts as any);
       }
     };
 
@@ -97,7 +146,7 @@ export const Home: React.FC = () => {
     {
       title: 'Energy & Substation Infrastructure',
       description: 'Heavy-duty high voltage breakers, transformer isolators, and armoured power distribution cabling.',
-      image: '/assets/images/industrial_category_distribution_1792851607023.jpg',
+      image: '/assets/images/industrial_cable_reel_1792848534820.jpg',
       icon: Zap
     }
   ];
@@ -253,39 +302,21 @@ export const Home: React.FC = () => {
       </section>
 
       {/* 4. Partner Network */}
-      <section className="py-16 sm:py-24 bg-navy border-b border-border">
+      <section className="py-16 sm:py-24 bg-navy border-b border-border relative overflow-hidden">
         <PageContainer>
-          <div className="text-center max-w-2xl mx-auto mb-16">
-            <h2 className="text-sm font-mono font-bold text-teal uppercase tracking-widest mb-4">
+          <div className="mb-8">
+            <h2 className="text-sm font-mono font-bold text-teal uppercase tracking-widest mb-2">
               Our Trusted Partners & Manufacturers
             </h2>
             <h3 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
               Global Industrial Alliances
             </h3>
-            <p className="text-sm text-text-secondary mt-3">
+            <p className="text-sm text-text-secondary mt-2">
               Official authorized distribution and systems integration partners providing world-class industrial equipment.
             </p>
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 sm:gap-6">
-            {BRANDS.map((brand, idx) => (
-              <div 
-                key={brand.id}
-                onClick={() => navigate(`/brands/${brand.slug}`)}
-                className="group p-5 bg-navy/80 border border-border rounded-xl hover:border-teal/60 hover:shadow-[0_0_20px_rgba(0,240,255,0.25)] transition-all cursor-pointer flex flex-col items-center text-center justify-between animate-float-gentle"
-                style={{ animationDelay: `${(idx % 5) * 0.3}s` }}
-              >
-                <div className="w-16 h-16 bg-navy-dark rounded-lg border border-border p-2 mb-4 flex items-center justify-center group-hover:scale-105 transition-transform">
-                  <img 
-                    src={brand.logo || '/src/assets/images/industrial_brand_logo_placeholder_1792848534850.jpg'}
-                    alt={brand.name}
-                    className="w-full h-full object-contain filter brightness-90 group-hover:brightness-100 transition-all"
-                  />
-                </div>
-                <h4 className="font-bold text-xs text-white group-hover:text-teal transition-colors line-clamp-1">{brand.name}</h4>
-                <span className="text-[10px] text-teal/80 font-mono mt-1 uppercase">Authorized Partner</span>
-              </div>
-            ))}
-          </div>
+
+          <BrandCarousel />
         </PageContainer>
       </section>
 
