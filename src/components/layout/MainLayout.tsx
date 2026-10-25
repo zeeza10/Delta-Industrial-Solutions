@@ -9,6 +9,7 @@ import { Footer } from './Footer';
 import { CartDrawer } from './CartDrawer';
 import { Outlet, useLocation } from 'react-router-dom';
 import { AuthModal } from '../auth/AuthModal';
+import { IndustrialBackground3D } from '../common/IndustrialBackground3D';
 
 export const MainLayout: React.FC = () => {
   const { pathname } = useLocation();
@@ -19,7 +20,8 @@ export const MainLayout: React.FC = () => {
   }, [pathname]);
 
   return (
-    <div className="flex flex-col min-h-screen bg-[#07090e] text-slate-100 selection:bg-cyan-500 selection:text-black bg-industrial-grid">
+    <div className="flex flex-col min-h-screen bg-[#07090e] text-slate-100 selection:bg-cyan-500 selection:text-black bg-industrial-grid relative">
+      <IndustrialBackground3D />
       {/* Accessibility: Skip to Main Content Link */}
       <a 
         href="#main-content" 

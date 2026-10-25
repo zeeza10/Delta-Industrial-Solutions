@@ -27,8 +27,31 @@ export const CategoryListing: React.FC = () => {
                         CATEGORIES.flatMap(c => c.subcategories || []).find((sc: any) => sc.slug === id) ||
                         CATEGORIES[0];
 
+  const getFilteredProducts = (cat: any, slug: string) => {
+    if (!cat && !slug) return PRODUCTS;
+    const targetSubcategory = CATEGORIES.flatMap(c => c.subcategories || []).find((sc: any) => sc.slug === slug || sc.id === slug);
+    const targetCategory = CATEGORIES.find(c => c.slug === slug || c.id === slug || c.slug === cat?.slug || c.id === cat?.id);
+
+    return PRODUCTS.filter(p => {
+      if (targetSubcategory) {
+        return p.categoryId === targetSubcategory.id || 
+               p.categoryId === slug || 
+               p.tags?.includes(targetSubcategory.id) || 
+               p.tags?.includes(slug) ||
+               p.slug?.includes(slug);
+      } else if (targetCategory) {
+        const subCategoryIds = targetCategory.subcategories ? targetCategory.subcategories.map((sc: any) => sc.id) : [];
+        return p.categoryId === targetCategory.id || 
+               subCategoryIds.includes(p.categoryId) || 
+               p.tags?.includes(targetCategory.id) || 
+               p.tags?.includes(targetCategory.slug);
+      }
+      return p.categoryId === slug || p.tags?.includes(slug);
+    });
+  };
+
   const [category, setCategory] = useState<Category | null>(localCategory as any);
-  const [products, setProducts] = useState<Product[]>(PRODUCTS.filter(p => p.categoryId === localCategory?.id));
+  const [products, setProducts] = useState<Product[]>(getFilteredProducts(localCategory, id || ''));
   const [allBrands, setAllBrands] = useState<Brand[]>(BRANDS);
 
   useEffect(() => {
@@ -47,7 +70,8 @@ export const CategoryListing: React.FC = () => {
         if (found) {
           setCategory(found);
           const catProducts = await getProductsByCategory(found.id);
-          if (catProducts.length > 0) setProducts(catProducts);
+          const fallback = getFilteredProducts(found, id);
+          setProducts(catProducts.length > 0 ? [...catProducts, ...fallback.filter(p => !catProducts.some(cp => cp.id === p.id))] : fallback);
           const brands = await getBrands();
           if (brands.length > 0) setAllBrands(brands);
         }
@@ -323,7 +347,7 @@ export const CategoryListing: React.FC = () => {
                 <div className="text-[10px] font-bold text-cyan-400 uppercase tracking-widest mb-2 px-1">
                   {parentCat?.name || category.name} Subcategories:
                 </div>
-                <div className="flex items-center gap-2 overflow-x-auto custom-scrollbar pb-1">
+                <div className="flex flex-wrap items-center gap-2 pb-1">
                   {parentCat && (
                     <Link
                       to={`/categories/${parentCat.slug}`}

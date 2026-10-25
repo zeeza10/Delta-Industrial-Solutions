@@ -55,13 +55,24 @@ export const searchProducts = (
 
   // 2. Filters
   if (filters.category) {
-    const targetCategory = CATEGORIES.find(c => c.slug === filters.category) || 
-                           CATEGORIES.flatMap(c => c.subcategories || []).find(sc => sc.slug === filters.category);
+    const targetSubcategory = CATEGORIES.flatMap(c => c.subcategories || []).find((sc: any) => sc.slug === filters.category || sc.id === filters.category);
+    const targetCategory = CATEGORIES.find(c => c.slug === filters.category || c.id === filters.category);
     
-    if (targetCategory) {
+    if (targetSubcategory) {
+      filtered = filtered.filter(p => 
+        p.categoryId === targetSubcategory.id || 
+        p.categoryId === filters.category ||
+        p.tags?.includes(targetSubcategory.id) ||
+        p.tags?.includes(filters.category || '') ||
+        p.slug?.includes(filters.category || '')
+      );
+    } else if (targetCategory) {
+      const subCategoryIds = targetCategory.subcategories ? targetCategory.subcategories.map(sc => sc.id) : [];
       filtered = filtered.filter(p => 
         p.categoryId === targetCategory.id || 
-        (CATEGORIES.find(c => c.id === targetCategory.id)?.subcategories?.some(sc => sc.id === p.categoryId))
+        subCategoryIds.includes(p.categoryId) ||
+        p.tags?.includes(targetCategory.id) ||
+        p.tags?.includes(targetCategory.slug)
       );
     }
   }
