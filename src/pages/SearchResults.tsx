@@ -23,45 +23,26 @@ import { SEO } from '../components/common/SEO';
 export const SearchResults: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [showMobileFilters, setShowMobileFilters] = useState(false);
-  const [allProducts, setAllProducts] = useState<Product[]>([]);
-  const [allBrands, setAllBrands] = useState<Brand[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [allProducts, setAllProducts] = useState<Product[]>(PRODUCTS);
+  const [allBrands, setAllBrands] = useState<Brand[]>(BRANDS);
 
   useEffect(() => {
     const fetchAllData = async () => {
-      setIsLoading(true);
       try {
         if (db) {
           const snap = await getDocs(collection(db, 'products'));
           const products = snap.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Product[];
-          setAllProducts(products.length > 0 ? products : PRODUCTS);
+          if (products.length > 0) setAllProducts(products);
           
           const brands = await getBrands();
-          setAllBrands(brands.length > 0 ? brands : BRANDS);
-        } else {
-          setAllProducts(PRODUCTS);
-          setAllBrands(BRANDS);
+          if (brands.length > 0) setAllBrands(brands);
         }
       } catch (error) {
         console.error('Error fetching search data:', error);
-        setAllProducts(PRODUCTS);
-        setAllBrands(BRANDS);
-      } finally {
-        setIsLoading(false);
       }
     };
     fetchAllData();
   }, []);
-
-  if (isLoading) {
-    return (
-      <PageContainer>
-        <div className="flex items-center justify-center min-h-[400px]">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-        </div>
-      </PageContainer>
-    );
-  }
   
   // URL States
   const query = searchParams.get('q') || '';
@@ -295,17 +276,17 @@ export const SearchResults: React.FC = () => {
 
           {results.length > 0 ? (
             <>
-              <div className="flex flex-wrap items-center justify-between gap-4 p-4 bg-[#0b0f19]/90 border border-cyan-500/30 rounded-xl mb-8 shadow-[0_0_20px_rgba(0,0,0,0.8)] backdrop-blur-xl font-mono">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 p-3.5 sm:p-4 bg-[#0b0f19]/90 border border-cyan-500/30 rounded-xl mb-8 shadow-[0_0_20px_rgba(0,0,0,0.8)] backdrop-blur-xl font-mono">
                 <div className="text-xs font-semibold text-slate-300">
                   Showing <span className="text-cyan-400 font-bold">{results.length}</span> certified products
                 </div>
-                <div className="flex items-center gap-4">
-                  <div className="flex items-center gap-1 border-r border-cyan-500/20 pr-4 mr-2">
+                <div className="flex flex-wrap items-center justify-between sm:justify-end gap-3">
+                  <div className="hidden sm:flex items-center gap-1 border-r border-cyan-500/20 pr-3 mr-1">
                     <button className="p-2 bg-cyan-500 text-black rounded font-bold"><LayoutGrid className="w-4 h-4" /></button>
                     <button className="p-2 hover:bg-cyan-950/40 rounded text-slate-400"><List className="w-4 h-4" /></button>
                   </div>
-                  <div className="flex items-center gap-2 text-slate-300">
-                    <SortAsc className="w-4 h-4 text-cyan-400" />
+                  <div className="flex items-center gap-2 text-slate-300 w-full sm:w-auto">
+                    <SortAsc className="w-4 h-4 text-cyan-400 shrink-0" />
                     <select 
                       value={sort}
                       onChange={(e) => {
@@ -313,7 +294,7 @@ export const SearchResults: React.FC = () => {
                         newParams.set('sort', e.target.value);
                         setSearchParams(newParams);
                       }}
-                      className="text-xs font-bold bg-[#07090e] border border-cyan-500/30 rounded px-2 py-1 text-cyan-400 focus:outline-none cursor-pointer"
+                      className="text-xs font-bold bg-[#07090e] border border-cyan-500/30 rounded px-2.5 py-1.5 text-cyan-400 focus:outline-none cursor-pointer w-full sm:w-auto"
                     >
                       <option value="relevance">Sort by: Relevance</option>
                       <option value="name">Sort by: Name</option>

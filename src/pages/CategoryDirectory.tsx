@@ -24,6 +24,26 @@ const CATEGORY_ICONS: Record<string, React.ReactNode> = {
   'earthing-lightning': <Radio className="w-5 h-5 text-teal" />,
 };
 
+const CATEGORY_IMAGES: Record<string, string> = {
+  'circuit-protection': '/assets/images/industrial_circuit_breaker_1792848534487.jpg',
+  'switches-sockets': '/assets/images/app_commercial_construction_1792851606559.jpg',
+  'cables-wires': '/assets/images/industrial_cable_reel_1792848534820.jpg',
+  'conduits-management': '/assets/images/industrial_category_distribution_1792848535201.jpg',
+  'industrial-automation': '/assets/images/cat_industrial_automation_1792851607023.jpg',
+  'panels-distribution': '/assets/images/app_manufacturing_systems_1792851607363.jpg',
+  'lighting': '/assets/images/prod_led_floodlight_1792851607088.jpg',
+  'earthing-lightning': '/assets/images/homepage_hero_industrial_1792851605594.jpg',
+  'safety-fire': '/assets/images/app_commercial_construction_1792851606559.jpg',
+  'security': '/assets/images/cat_industrial_automation_1792851607023.jpg',
+  'renewables': '/assets/images/industrial_cable_reel_1792848534820.jpg',
+  'test-instruments': '/assets/images/prod_industrial_plc_1792851607627.jpg',
+  'industrial-tools': '/assets/images/app_manufacturing_systems_1792851607363.jpg',
+  'transformers': '/assets/images/industrial_circuit_breaker_1792848534487.jpg',
+  'ups-protection': '/assets/images/industrial_category_distribution_1792848535201.jpg',
+  'e-mobility': '/assets/images/prod_led_floodlight_1792851607088.jpg',
+  'clearance': '/assets/images/homepage_hero_industrial_1792851605594.jpg',
+};
+
 export const CategoryDirectory: React.FC = () => {
   const navigate = useNavigate();
   const [selectedTab, setSelectedTab] = useState<string>('all');
@@ -174,7 +194,7 @@ export const CategoryDirectory: React.FC = () => {
                 <CategoryCard 
                   name={category.name} 
                   count={PRODUCTS.filter(p => p.categoryId === category.id || (category.subcategories?.some((sc: any) => sc.id === p.categoryId))).length} 
-                  image={`/src/assets/images/industrial_category_distribution_1792851607023.jpg`}
+                  image={CATEGORY_IMAGES[category.id] || '/assets/images/industrial_category_distribution_1792848535201.jpg'}
                 />
               </Link>
 

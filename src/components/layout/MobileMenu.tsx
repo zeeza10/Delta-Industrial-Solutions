@@ -1,10 +1,11 @@
 import React, { useEffect } from 'react';
 import { NavLink, Link, useNavigate } from 'react-router-dom';
 import { CATEGORIES } from '../../data/categories';
-import { X, ChevronDown, ChevronRight, User, Heart, ShoppingBag, ClipboardList, Search, Settings, LogOut, LogIn } from 'lucide-react';
+import { X, ChevronDown, ChevronRight, User, Heart, ShoppingBag, ClipboardList, Search, Settings, LogOut, LogIn, Mic } from 'lucide-react';
 import { useStore } from '../../context/StoreContext';
 import { useAuth } from '../../context/AuthContext';
 import { Logo3D } from '../common/3DLogo';
+import { VoiceSearchModal } from '../common/VoiceSearchModal';
 
 interface MobileMenuProps {
   isOpen: boolean;
@@ -15,6 +16,7 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({ isOpen, onClose }) => {
   const navigate = useNavigate();
   const [expandedCategories, setExpandedCategories] = React.useState<string[]>([]);
   const [searchQuery, setSearchQuery] = React.useState('');
+  const [isVoiceModalOpen, setIsVoiceModalOpen] = React.useState(false);
   
   const { user, isAdmin, signOut, openAuthModal } = useAuth();
   const { cart, wishlist, openCartDrawer } = useStore();
@@ -82,7 +84,7 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({ isOpen, onClose }) => {
         role="dialog"
         aria-modal="true"
         aria-label="Mobile Navigation Menu"
-        className={`fixed top-0 left-0 bottom-0 z-[70] w-full max-w-xs bg-[#07090e] text-slate-100 shadow-[0_0_40px_rgba(0,0,0,0.9)] border-r border-cyan-500/30 transition-transform duration-300 ease-in-out transform ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}
+        className={`fixed inset-y-0 left-0 z-[70] w-full max-w-xs bg-[#07090e] text-slate-100 shadow-[0_0_40px_rgba(0,0,0,0.9)] border-r border-cyan-500/30 transition-transform duration-300 ease-in-out transform flex flex-col h-full overflow-hidden ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}
       >
         <div className="flex flex-col h-full">
           {/* Header */}
@@ -115,8 +117,17 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({ isOpen, onClose }) => {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 aria-label="Search products"
-                className="w-full pl-9 pr-3 py-2 bg-[#07090e] border border-cyan-500/30 rounded-lg text-xs font-medium text-slate-100 placeholder:text-slate-500 focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 font-mono"
+                className="w-full pl-9 pr-10 py-2 bg-[#07090e] border border-cyan-500/30 rounded-lg text-xs font-medium text-slate-100 placeholder:text-slate-500 focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 font-mono"
               />
+              <button 
+                type="button"
+                onClick={() => setIsVoiceModalOpen(true)}
+                aria-label="Open AI Voice Search"
+                title="Open AI Voice Search Assistant"
+                className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded hover:bg-cyan-500/20 text-cyan-400 transition-colors flex items-center"
+              >
+                <Mic className="w-4 h-4 animate-pulse" />
+              </button>
             </form>
           </div>
 
@@ -239,6 +250,17 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({ isOpen, onClose }) => {
           </div>
         </div>
       </div>
+
+      {/* AI Voice Search Modal */}
+      <VoiceSearchModal 
+        isOpen={isVoiceModalOpen}
+        onClose={() => setIsVoiceModalOpen(false)}
+        onTranscript={(query) => {
+          setSearchQuery(query);
+          navigate(`/search?q=${encodeURIComponent(query.trim())}`);
+          onClose();
+        }}
+      />
     </>
   );
 };

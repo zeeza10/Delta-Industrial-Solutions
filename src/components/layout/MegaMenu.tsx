@@ -50,18 +50,28 @@ export const MegaMenu: React.FC<MegaMenuProps> = ({ isOpen, onClose }) => {
   const [activeCategoryId, setActiveCategoryId] = useState<string>(CATEGORIES[0]?.id || 'circuit-protection');
   const menuRef = useRef<HTMLDivElement>(null);
 
-  // Close on Escape key press
+  // Close on Escape key press or outside click
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && isOpen) {
         onClose();
       }
     };
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        const target = event.target as HTMLElement;
+        if (!target.closest('button[aria-haspopup="true"]')) {
+          onClose();
+        }
+      }
+    };
     if (isOpen) {
       window.addEventListener('keydown', handleKeyDown);
+      document.addEventListener('mousedown', handleClickOutside);
     }
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
+      document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [isOpen, onClose]);
 
@@ -77,12 +87,12 @@ export const MegaMenu: React.FC<MegaMenuProps> = ({ isOpen, onClose }) => {
         ref={menuRef}
         role="dialog"
         aria-label="All Categories Navigation"
-        className="absolute top-full left-0 right-0 w-full z-50 bg-[#0b0f19]/95 border-b border-cyan-500/30 shadow-[0_20px_50px_rgba(0,0,0,0.9)] animate-in fade-in slide-in-from-top-4 duration-300 backdrop-blur-xl"
+        className="absolute top-full left-0 right-0 w-full z-50 bg-[#0b0f19]/95 border-b border-cyan-500/30 shadow-[0_20px_50px_rgba(0,0,0,0.9)] animate-in fade-in slide-in-from-top-4 duration-300 backdrop-blur-xl max-h-[calc(100vh-110px)] overflow-y-auto custom-scrollbar"
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           
           {/* Main Master-Detail Tab Layout */}
-          <div className="flex flex-col md:flex-row gap-8 lg:gap-12 min-h-[420px] max-h-[calc(100vh-180px)] overflow-y-auto custom-scrollbar">
+          <div className="flex flex-col md:flex-row gap-8 lg:gap-12 min-h-[420px]">
             
             {/* Left Column: Category Tabs List */}
             <div 

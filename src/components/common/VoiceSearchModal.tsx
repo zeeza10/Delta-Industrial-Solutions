@@ -99,8 +99,8 @@ export const VoiceSearchModal: React.FC<VoiceSearchModalProps> = ({ isOpen, onCl
   ];
 
   return (
-    <div className="fixed inset-0 z-[300] bg-black/85 backdrop-blur-md flex items-center justify-center p-4 font-mono">
-      <div className="bg-[#0b0f19] border border-cyan-500/40 rounded-2xl max-w-lg w-full p-6 sm:p-8 shadow-[0_0_60px_rgba(0,240,255,0.25)] relative text-center space-y-6 animate-in fade-in zoom-in duration-200">
+    <div className="fixed inset-0 z-[300] bg-black/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 overflow-y-auto font-mono">
+      <div className="bg-[#0b0f19] border border-cyan-500/40 rounded-2xl max-w-lg w-full p-5 sm:p-8 shadow-[0_0_60px_rgba(0,240,255,0.25)] relative text-center space-y-5 sm:space-y-6 my-auto max-h-[95vh] overflow-y-auto custom-scrollbar animate-in fade-in zoom-in duration-200">
         
         {/* Close Button */}
         <button 

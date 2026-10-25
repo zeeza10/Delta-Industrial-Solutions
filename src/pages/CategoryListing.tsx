@@ -23,22 +23,22 @@ export const CategoryListing: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const [searchParams, setSearchParams] = useSearchParams();
   const [showMobileFilters, setShowMobileFilters] = useState(false);
-  const [category, setCategory] = useState<Category | null>(null);
-  const [products, setProducts] = useState<Product[]>([]);
-  const [allBrands, setAllBrands] = useState<Brand[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const localCategory = CATEGORIES.find(c => c.slug === id) || 
+                        CATEGORIES.flatMap(c => c.subcategories || []).find((sc: any) => sc.slug === id) ||
+                        CATEGORIES[0];
+
+  const [category, setCategory] = useState<Category | null>(localCategory as any);
+  const [products, setProducts] = useState<Product[]>(PRODUCTS.filter(p => p.categoryId === localCategory?.id));
+  const [allBrands, setAllBrands] = useState<Brand[]>(BRANDS);
 
   useEffect(() => {
     const fetchCategoryData = async () => {
       if (!id) return;
-      setIsLoading(true);
       try {
         const categories = await getCategories();
-        // Find by slug
         let found = categories.find(c => c.slug === id);
         
         if (!found) {
-          // Fallback to local
           const local = CATEGORIES.find(c => c.slug === id) || 
                         CATEGORIES.flatMap(c => c.subcategories || []).find((sc: any) => sc.slug === id);
           if (local) found = local as any;
@@ -47,28 +47,16 @@ export const CategoryListing: React.FC = () => {
         if (found) {
           setCategory(found);
           const catProducts = await getProductsByCategory(found.id);
-          setProducts(catProducts.length > 0 ? catProducts : PRODUCTS.filter(p => p.categoryId === found?.id));
+          if (catProducts.length > 0) setProducts(catProducts);
           const brands = await getBrands();
-          setAllBrands(brands.length > 0 ? brands : BRANDS);
+          if (brands.length > 0) setAllBrands(brands);
         }
       } catch (error) {
         console.error('Error fetching category:', error);
-      } finally {
-        setIsLoading(false);
       }
     };
     fetchCategoryData();
   }, [id]);
-
-  if (isLoading) {
-    return (
-      <PageContainer>
-        <div className="flex items-center justify-center min-h-[400px]">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-        </div>
-      </PageContainer>
-    );
-  }
 
   if (!category) {
     return (
@@ -394,17 +382,17 @@ export const CategoryListing: React.FC = () => {
             </div>
           )}
 
-          <div className="flex flex-wrap items-center justify-between gap-4 p-4 bg-[#0b0f19]/90 border border-cyan-500/30 rounded-xl mb-8 shadow-[0_0_20px_rgba(0,0,0,0.8)] backdrop-blur-xl font-mono">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 p-3.5 sm:p-4 bg-[#0b0f19]/90 border border-cyan-500/30 rounded-xl mb-8 shadow-[0_0_20px_rgba(0,0,0,0.8)] backdrop-blur-xl font-mono">
             <div className="text-xs font-semibold text-slate-300">
               Showing <span className="text-cyan-400 font-bold">{results.length}</span> certified components
             </div>
-            <div className="flex items-center gap-4">
-              <div className="flex items-center gap-1 border-r border-cyan-500/20 pr-4 mr-2">
+            <div className="flex flex-wrap items-center justify-between sm:justify-end gap-3">
+              <div className="hidden sm:flex items-center gap-1 border-r border-cyan-500/20 pr-3 mr-1">
                 <button className="p-2 bg-cyan-500 text-black rounded font-bold"><LayoutGrid className="w-4 h-4" /></button>
                 <button className="p-2 hover:bg-cyan-950/40 rounded text-slate-400"><List className="w-4 h-4" /></button>
               </div>
-              <div className="flex items-center gap-2 text-slate-300">
-                <SortAsc className="w-4 h-4 text-cyan-400" />
+              <div className="flex items-center gap-2 text-slate-300 w-full sm:w-auto">
+                <SortAsc className="w-4 h-4 text-cyan-400 shrink-0" />
                 <select 
                   value={sort}
                   onChange={(e) => {
@@ -412,7 +400,7 @@ export const CategoryListing: React.FC = () => {
                     newParams.set('sort', e.target.value);
                     setSearchParams(newParams);
                   }}
-                  className="text-xs font-bold bg-[#07090e] border border-cyan-500/30 rounded px-2 py-1 text-cyan-400 focus:outline-none cursor-pointer"
+                  className="text-xs font-bold bg-[#07090e] border border-cyan-500/30 rounded px-2.5 py-1.5 text-cyan-400 focus:outline-none cursor-pointer w-full sm:w-auto"
                 >
                   <option value="relevance">Sort by: Relevance</option>
                   <option value="name">Sort by: Name</option>
