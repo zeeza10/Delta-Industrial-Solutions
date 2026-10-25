@@ -351,7 +351,7 @@ export const CategoryListing: React.FC = () => {
                   {parentCat && (
                     <Link
                       to={`/categories/${parentCat.slug}`}
-                      className={`px-3.5 py-1.5 rounded text-xs font-bold whitespace-nowrap transition-all border shrink-0 ${
+                      className={`px-3 py-2 rounded-lg text-xs font-bold transition-all border max-w-full text-left leading-relaxed ${
                         category.slug === parentCat.slug
                           ? 'bg-cyan-500 text-black border-cyan-400 shadow-[0_0_15px_rgba(0,240,255,0.4)]'
                           : 'bg-[#07090e] text-slate-300 border-cyan-500/30 hover:border-cyan-400 hover:text-cyan-400'
@@ -366,7 +366,7 @@ export const CategoryListing: React.FC = () => {
                       <Link
                         key={sub.id}
                         to={`/categories/${sub.slug}`}
-                        className={`px-3.5 py-1.5 rounded text-xs font-bold whitespace-nowrap transition-all border shrink-0 ${
+                        className={`px-3 py-2 rounded-lg text-xs font-bold transition-all border max-w-full text-left leading-relaxed ${
                           isCurrent
                             ? 'bg-cyan-500 text-black border-cyan-400 shadow-[0_0_15px_rgba(0,240,255,0.4)]'
                             : 'bg-[#07090e] text-slate-300 border-cyan-500/30 hover:border-cyan-400 hover:text-cyan-400'
