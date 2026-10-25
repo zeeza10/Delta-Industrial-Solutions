@@ -106,7 +106,7 @@ export const Footer: React.FC = () => {
               </div>
               <div className="flex items-center gap-3">
                 <PhoneCall className="w-4 h-4 text-teal shrink-0" />
-                <a href="tel:+923471980150" className="hover:text-teal font-bold transition-colors">+92 347 1980150</a>
+                <a href="tel:+923116226139" className="hover:text-teal font-bold transition-colors">+92 311 6226139</a>
               </div>
               <div className="flex items-center gap-3">
                 <Mail className="w-4 h-4 text-teal shrink-0" />

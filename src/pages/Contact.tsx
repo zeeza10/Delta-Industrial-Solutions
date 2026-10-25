@@ -118,7 +118,7 @@ export const Contact: React.FC = () => {
     <PageContainer>
       <SEO 
         title="Contact Us | Delta Industrial Solutions Private Limited" 
-        description="Get in touch with Delta Industrial Solutions Private Limited. Contact our technical desk at Tree House, Garden Town, Cantt Multan or call +92 347 1980150." 
+        description="Get in touch with Delta Industrial Solutions Private Limited. Contact our technical desk at Tree House, Garden Town, Cantt Multan or call +92 311 6226139." 
       />
       <Breadcrumbs items={breadcrumbs} className="mb-8" />
 
@@ -155,7 +155,7 @@ export const Contact: React.FC = () => {
                 <Phone className="w-4 h-4 text-cyan-400 shrink-0 mt-0.5" />
                 <div>
                   <div className="font-bold text-white">Direct Mobile / WhatsApp</div>
-                  <a href="tel:+923471980150" className="text-cyan-400 font-bold hover:underline mt-0.5 block">+92 347 1980150</a>
+                  <a href="tel:+923116226139" className="text-cyan-400 font-bold hover:underline mt-0.5 block">+92 311 6226139</a>
                 </div>
               </div>
 
@@ -238,7 +238,7 @@ export const Contact: React.FC = () => {
               />
               <TextInput 
                 label="Phone / Mobile" 
-                placeholder="+92 347 1980150" 
+                placeholder="+92 311 6226139" 
                 required 
                 value={formData.phone}
                 onChange={(e) => setFormData({ ...formData, phone: e.target.value })}

@@ -84,7 +84,7 @@ export const Header: React.FC = () => {
   ];
 
   return (
-    <header className="relative z-[100] w-full">
+    <header className="fixed top-0 left-0 right-0 z-[100] w-full shadow-2xl">
       <AnnouncementBar />
       
       {/* Main Header Desktop */}

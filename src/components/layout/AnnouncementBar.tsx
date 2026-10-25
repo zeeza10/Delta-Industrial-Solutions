@@ -23,9 +23,9 @@ export const AnnouncementBar: React.FC = () => {
               <Clock className="w-3.5 h-3.5 text-teal shrink-0" />
               <span>24/7 Engineering Desk Online</span>
             </div>
-            <a href="tel:+923471980150" className="hover:text-cyan-400 transition-colors flex items-center gap-1.5 font-bold text-white">
+            <a href="tel:+923116226139" className="hover:text-cyan-400 transition-colors flex items-center gap-1.5 font-bold text-white">
               <PhoneCall className="w-3.5 h-3.5 text-cyan-400" />
-              <span>+92 347 1980150</span>
+              <span>+92 311 6226139</span>
             </a>
             <Link to="/bulk-quote" className="hidden sm:inline-flex items-center gap-1 text-teal font-bold hover:underline">
               <FileText className="w-3.5 h-3.5" />

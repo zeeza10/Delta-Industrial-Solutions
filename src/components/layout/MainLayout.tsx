@@ -29,7 +29,7 @@ export const MainLayout: React.FC = () => {
       </a>
 
       <Header />
-      <main id="main-content" tabIndex={-1} className="flex-grow focus:outline-none">
+      <main id="main-content" tabIndex={-1} className="flex-grow focus:outline-none pt-[110px]">
         <Outlet />
       </main>
       <Footer />

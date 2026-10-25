@@ -61,7 +61,7 @@ export const BrandCarousel: React.FC = () => {
             {/* Logo Container with 3D Depth */}
             <div className="relative z-10 w-32 h-32 sm:w-36 sm:h-36 bg-[#04060a] rounded-xl border border-cyan-500/50 p-4 mb-5 flex items-center justify-center group-hover:scale-110 group-hover:border-cyan-300 transition-all duration-300 shadow-[inset_0_0_30px_rgba(0,240,255,0.2)]">
               <img 
-                src={brand.logo || '/src/assets/images/industrial_brand_logo_placeholder_1792848534850.jpg'}
+                src={brand.logo || '/assets/images/industrial_brand_logo_placeholder_1792848534850.jpg'}
                 alt={brand.name}
                 className="w-full h-full object-contain filter drop-shadow-[0_0_15px_rgba(0,240,255,0.5)] group-hover:scale-105 transition-transform"
               />
