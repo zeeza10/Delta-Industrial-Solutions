@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Outlet, Navigate } from 'react-router-dom';
 import { useAuth } from '../../../context/AuthContext';
 import { AdminProvider } from '../../context/AdminContext';
@@ -13,15 +13,16 @@ import { SEO } from '../../../components/common/SEO';
 
 const VIPAdminLayoutContent: React.FC = () => {
   const { user, isAdmin, loading } = useAuth();
-  const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#07090e]">
+      <div className="min-h-screen flex items-center justify-center bg-[#090B10]">
         <SEO title="VIP Admin Control Center | Delta Industrial" noIndex={true} />
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-12 h-12 rounded-full border-2 border-cyan-500/20 border-t-cyan-400 animate-spin shadow-[0_0_20px_rgba(0,240,255,0.3)]" />
-          <p className="text-xs font-mono text-cyan-400 tracking-widest uppercase">Authenticating VIP Admin Session...</p>
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-10 h-10 rounded-full border-2 border-[#273244] border-t-[#22D3EE] animate-spin" />
+          <p className="text-xs font-mono text-slate-400 tracking-widest uppercase">
+            Verifying Admin Session...
+          </p>
         </div>
       </div>
     );
@@ -33,20 +34,23 @@ const VIPAdminLayoutContent: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#07090e] text-slate-100 flex overflow-hidden">
+    <div className="h-screen w-full bg-[#090B10] text-slate-100 flex overflow-hidden antialiased">
       <SEO title="VIP Admin Control Center | Delta Industrial" noIndex={true} />
 
-      {/* Sidebar Navigation */}
-      <AdminSidebar
-        isOpenMobile={isMobileMenuOpen}
-        onCloseMobile={() => setMobileMenuOpen(false)}
-      />
+      {/* Persistent Left Navigation Sidebar */}
+      <AdminSidebar />
 
-      {/* Main Administrative Workspace */}
+      {/* Main Administrative Workspace Shell */}
       <div className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
-        <AdminHeader onOpenMobileMenu={() => setMobileMenuOpen(true)} />
+        {/* Persistent Top Header */}
+        <AdminHeader />
 
-        <main className="flex-1 overflow-y-auto p-4 lg:p-8 custom-scrollbar">
+        {/* Primary Content Region with consistent gutters and singular scroll container */}
+        <main 
+          id="admin-main-content"
+          tabIndex={-1}
+          className="flex-1 overflow-y-auto px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-7 custom-scrollbar focus:outline-none"
+        >
           <div className="max-w-7xl mx-auto space-y-6">
             <Outlet />
           </div>

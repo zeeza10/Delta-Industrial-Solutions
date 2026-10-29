@@ -4,7 +4,7 @@
  */
 
 import React, { useState } from 'react';
-import { Tag, Plus, Search, Edit2, Trash2 } from 'lucide-react';
+import { Tag, Plus, Search, CheckCircle2 } from 'lucide-react';
 import { BRANDS } from '../../data/brands';
 import { AdminBadge } from '../components/common/AdminBadge';
 
@@ -18,55 +18,70 @@ export const VIPBrandManager: React.FC = () => {
 
   return (
     <div className="space-y-6 font-mono">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-5">
+      {/* Consistent Page Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#273244] pb-4">
         <div>
           <div className="flex items-center gap-2 mb-1">
             <AdminBadge variant="vip">OEM PARTNERS</AdminBadge>
+            <span className="px-1.5 py-0.5 rounded text-[9px] font-mono text-slate-400 bg-[#18212D] border border-[#273244]">
+              CERTIFIED GLOBAL LINES
+            </span>
           </div>
-          <h1 className="text-2xl font-bold text-white text-glow-cyan">Manufacturer Brands & OEM Distribution</h1>
-          <p className="text-xs text-slate-400">Manage certified electrical manufacturer partners and branding assets.</p>
+          <h1 className="text-xl sm:text-2xl font-bold text-slate-100 tracking-tight">Manufacturer Brands & Distribution</h1>
+          <p className="text-xs text-slate-400">Certified electrical manufacturer partnerships and equipment distribution lines.</p>
         </div>
 
-        <button className="px-4 py-2 rounded-lg bg-gradient-to-r from-cyan-400 to-blue-600 hover:from-cyan-300 hover:to-blue-500 text-black font-bold text-xs flex items-center gap-1.5 shadow-[0_0_20px_rgba(0,240,255,0.3)]">
+        <button className="px-4 py-2 rounded-lg bg-[#22D3EE] hover:bg-[#38BDF8] text-slate-950 font-bold text-xs tracking-wider uppercase flex items-center gap-1.5 transition-colors shadow-sm focus-visible:ring-1 focus-visible:ring-[#22D3EE] outline-none shrink-0">
           <Plus className="w-4 h-4" />
           <span>Add Brand</span>
         </button>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      {/* Filter Toolbar */}
+      <div className="flex items-center gap-2 px-3.5 py-2 rounded-lg bg-[#090B10] border border-[#273244] text-xs max-w-md focus-within:border-[#22D3EE] transition-colors">
+        <Search className="w-4 h-4 text-slate-500 shrink-0" />
+        <input
+          type="text"
+          placeholder="Filter brands by name or slug..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="bg-transparent border-none outline-none text-slate-100 placeholder-slate-500 w-full"
+        />
+      </div>
+
+      {/* Brand Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
         {filtered.map((brand) => (
-          <div key={brand.id} className="bg-[#0b0f19] border border-cyan-500/20 hover:border-cyan-400/40 rounded-xl p-5 shadow-[0_0_20px_rgba(0,0,0,0.6)] space-y-3 group transition-all">
-            <div className="flex items-start justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-[#07090e] border border-slate-800 flex items-center justify-center p-1.5 overflow-hidden">
-                  {brand.logo ? (
-                    <img src={brand.logo} alt={brand.name} className="max-w-full max-h-full object-contain" />
-                  ) : (
-                    <Tag className="w-5 h-5 text-cyan-400" />
-                  )}
+          <div key={brand.id} className="bg-[#121823] border border-[#273244] hover:border-[#22D3EE]/40 rounded-xl p-5 shadow-lg shadow-black/30 space-y-3 transition-colors flex flex-col justify-between">
+            <div className="space-y-3">
+              <div className="flex items-start justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-[#18212D] border border-[#273244] flex items-center justify-center p-1.5 overflow-hidden shrink-0">
+                    {brand.logo ? (
+                      <img src={brand.logo} alt={brand.name} className="max-w-full max-h-full object-contain" />
+                    ) : (
+                      <Tag className="w-4 h-4 text-[#22D3EE]" />
+                    )}
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-slate-100">{brand.name}</h4>
+                    <span className="text-[10px] text-slate-400 font-mono">{brand.slug}</span>
+                  </div>
                 </div>
-                <div>
-                  <h4 className="font-bold text-white group-hover:text-cyan-400 transition-colors">{brand.name}</h4>
-                  <span className="text-[10px] text-slate-500">{brand.slug}</span>
-                </div>
+                <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-950/40 text-emerald-400 border border-emerald-500/30">
+                  ACTIVE
+                </span>
               </div>
-              <span className="px-2 py-0.5 rounded text-[10px] bg-emerald-950/60 text-emerald-400 border border-emerald-500/30">
-                ACTIVE
-              </span>
+
+              <p className="text-xs text-slate-400 line-clamp-2 leading-relaxed">{brand.description}</p>
             </div>
 
-            <p className="text-xs text-slate-400 line-clamp-2">{brand.description}</p>
-
-            <div className="pt-2 border-t border-slate-800/80 flex items-center justify-between text-xs text-slate-400">
-              <span>Tier 1 OEM</span>
-              <div className="flex items-center gap-2">
-                <button className="hover:text-cyan-400 p-1">
-                  <Edit2 className="w-3.5 h-3.5" />
-                </button>
-                <button className="hover:text-rose-400 p-1">
-                  <Trash2 className="w-3.5 h-3.5" />
-                </button>
+            <div className="pt-2.5 border-t border-[#273244]/70 flex items-center justify-between text-xs text-slate-400">
+              <div className="flex items-center gap-1.5 text-emerald-400">
+                <CheckCircle2 className="w-3.5 h-3.5" />
+                <span className="text-[11px]">Authorized Distributor</span>
               </div>
+              <span className="text-[11px] text-[#22D3EE] font-mono">Tier-1 OEM</span>
             </div>
           </div>
         ))}

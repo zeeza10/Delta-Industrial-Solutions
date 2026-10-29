@@ -37,16 +37,8 @@ const Account = lazy(() => import('../pages/Account').then(m => ({ default: m.Ac
 const StyleShowcase = lazy(() => import('../pages/StyleShowcase').then(m => ({ default: m.StyleShowcase })));
 const NotFound = lazy(() => import('../pages/NotFound').then(m => ({ default: m.NotFound })));
 
-// Admin Lazy Routes
-const VIPAdminLayout = lazy(() => import('../admin/components/layout/VIPAdminLayout').then(m => ({ default: m.VIPAdminLayout })));
-const VIPDashboard = lazy(() => import('../admin/pages/VIPDashboard').then(m => ({ default: m.VIPDashboard })));
-const VIPCategoryManager = lazy(() => import('../admin/pages/VIPCategoryManager').then(m => ({ default: m.VIPCategoryManager })));
-const VIPBrandManager = lazy(() => import('../admin/pages/VIPBrandManager').then(m => ({ default: m.VIPBrandManager })));
-const VIPUserManager = lazy(() => import('../admin/pages/VIPUserManager').then(m => ({ default: m.VIPUserManager })));
-const VIPAnalytics = lazy(() => import('../admin/pages/VIPAnalytics').then(m => ({ default: m.VIPAnalytics })));
-const VIPSettingsManager = lazy(() => import('../admin/pages/VIPSettingsManager').then(m => ({ default: m.VIPSettingsManager })));
-const AdminProducts = lazy(() => import('../pages/admin/Products').then(m => ({ default: m.AdminProducts })));
-const AdminEnquiries = lazy(() => import('../pages/admin/Enquiries').then(m => ({ default: m.AdminEnquiries })));
+// Admin Dedicated Route Tree
+import { adminRoutes } from '../admin/routes/adminRoutes';
 
 // Accessible loading fallback
 const PageFallback: React.FC = () => (
@@ -159,42 +151,5 @@ export const routerConfig: RouteObject[] = [
       },
     ],
   },
-  {
-    path: '/admin',
-    element: withSuspense(VIPAdminLayout),
-    children: [
-      {
-        index: true,
-        element: withSuspense(VIPDashboard),
-      },
-      {
-        path: 'products',
-        element: withSuspense(AdminProducts),
-      },
-      {
-        path: 'enquiries',
-        element: withSuspense(AdminEnquiries),
-      },
-      {
-        path: 'categories',
-        element: withSuspense(VIPCategoryManager),
-      },
-      {
-        path: 'brands',
-        element: withSuspense(VIPBrandManager),
-      },
-      {
-        path: 'users',
-        element: withSuspense(VIPUserManager),
-      },
-      {
-        path: 'analytics',
-        element: withSuspense(VIPAnalytics),
-      },
-      {
-        path: 'settings',
-        element: withSuspense(VIPSettingsManager),
-      },
-    ],
-  },
+  adminRoutes,
 ];

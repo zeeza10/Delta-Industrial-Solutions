@@ -3,22 +3,23 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { createContext, useContext, useState, useMemo, useCallback } from 'react';
-import { AdminRole, AdminUserCapability, SystemHealthStatus } from '../types/admin.types';
+import React, { createContext, useContext, useState, useMemo, useCallback, useEffect } from 'react';
+import { AdminRole, AdminUserCapability, SystemHealthStatus, HealthProbeStatus } from '../types/admin.types';
 import { useAuth } from '../../context/AuthContext';
 import { db, auth } from '../../lib/firebase';
+import { doc, getDocFromServer } from 'firebase/firestore';
 
 interface AdminContextValue {
   isSidebarCollapsed: boolean;
   toggleSidebar: () => void;
   setSidebarCollapsed: (collapsed: boolean) => void;
-  activeSection: string;
-  setActiveSection: (section: string) => void;
+  isMobileMenuOpen: boolean;
+  openMobileMenu: () => void;
+  closeMobileMenu: () => void;
   adminRole: AdminRole;
   capabilities: AdminUserCapability;
   systemHealth: SystemHealthStatus;
   refreshSystemHealth: () => Promise<void>;
-  unreadNotificationsCount: number;
 }
 
 const defaultCapabilities: AdminUserCapability = {
@@ -36,21 +37,25 @@ const AdminContext = createContext<AdminContextValue | undefined>(undefined);
 export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user, profile } = useAuth();
   const [isSidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [activeSection, setActiveSection] = useState('dashboard');
-  const [unreadNotificationsCount] = useState(3);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const toggleSidebar = useCallback(() => {
     setSidebarCollapsed(prev => !prev);
   }, []);
 
+  const openMobileMenu = useCallback(() => setIsMobileMenuOpen(true), []);
+  const closeMobileMenu = useCallback(() => setIsMobileMenuOpen(false), []);
+
   const adminRole: AdminRole = useMemo(() => {
-    // Determine admin role based on profile or fallback
-    return 'super_admin';
-  }, []);
+    return profile?.role === 'admin' ? 'super_admin' : 'support_admin';
+  }, [profile?.role]);
 
   const capabilities = useMemo(() => defaultCapabilities, []);
 
   const [systemHealth, setSystemHealth] = useState<SystemHealthStatus>({
+    databaseStatus: db ? 'checking' : 'unconfigured',
+    authStatus: auth ? 'connected' : 'unconfigured',
+    lastChecked: null,
     databaseConnected: !!db,
     authConnected: !!auth,
     storageConnected: true,
@@ -58,38 +63,80 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     pendingSyncOperations: 0,
   });
 
-  const refreshSystemHealth = useCallback(async () => {
-    setSystemHealth({
-      databaseConnected: !!db,
-      authConnected: !!auth,
-      storageConnected: true,
-      lastSyncTimestamp: new Date().toISOString(),
-      pendingSyncOperations: 0,
-    });
+  const probeHealth = useCallback(async () => {
+    if (!db) {
+      setSystemHealth({
+        databaseStatus: 'unconfigured',
+        authStatus: auth ? 'connected' : 'unconfigured',
+        lastChecked: new Date().toISOString(),
+        databaseConnected: false,
+        authConnected: !!auth,
+        storageConnected: false,
+        lastSyncTimestamp: new Date().toISOString(),
+        pendingSyncOperations: 0,
+      });
+      return;
+    }
+
+    try {
+      // Test real connection to Firestore server
+      await getDocFromServer(doc(db, '_connection_probe_', 'health'));
+      setSystemHealth({
+        databaseStatus: 'connected',
+        authStatus: auth ? 'connected' : 'unconfigured',
+        lastChecked: new Date().toISOString(),
+        databaseConnected: true,
+        authConnected: !!auth,
+        storageConnected: true,
+        lastSyncTimestamp: new Date().toISOString(),
+        pendingSyncOperations: 0,
+      });
+    } catch (err: any) {
+      // If error indicates client is offline, mark disconnected
+      const isOffline = err?.message?.toLowerCase().includes('offline') || err?.code === 'unavailable';
+      const status: HealthProbeStatus = isOffline ? 'disconnected' : 'connected'; // Permission errors still mean server is connected and responding
+
+      setSystemHealth({
+        databaseStatus: status,
+        authStatus: auth ? 'connected' : 'unconfigured',
+        lastChecked: new Date().toISOString(),
+        errorMessage: isOffline ? 'Firestore client is currently offline' : undefined,
+        databaseConnected: status === 'connected',
+        authConnected: !!auth,
+        storageConnected: status === 'connected',
+        lastSyncTimestamp: new Date().toISOString(),
+        pendingSyncOperations: 0,
+      });
+    }
   }, []);
+
+  useEffect(() => {
+    probeHealth();
+  }, [probeHealth]);
 
   const value = useMemo(
     () => ({
       isSidebarCollapsed,
       toggleSidebar,
       setSidebarCollapsed,
-      activeSection,
-      setActiveSection,
+      isMobileMenuOpen,
+      openMobileMenu,
+      closeMobileMenu,
       adminRole,
       capabilities,
       systemHealth,
-      refreshSystemHealth,
-      unreadNotificationsCount,
+      refreshSystemHealth: probeHealth,
     }),
     [
       isSidebarCollapsed,
       toggleSidebar,
-      activeSection,
+      isMobileMenuOpen,
+      openMobileMenu,
+      closeMobileMenu,
       adminRole,
       capabilities,
       systemHealth,
-      refreshSystemHealth,
-      unreadNotificationsCount,
+      probeHealth,
     ]
   );
 

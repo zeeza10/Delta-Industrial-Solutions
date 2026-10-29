@@ -4,7 +4,7 @@
  */
 
 import React, { useState } from 'react';
-import { Settings, Shield, Bell, Database, Save, CheckCircle2 } from 'lucide-react';
+import { Settings, Shield, Save, CheckCircle2 } from 'lucide-react';
 import { AdminBadge } from '../components/common/AdminBadge';
 
 export const VIPSettingsManager: React.FC = () => {
@@ -18,95 +18,99 @@ export const VIPSettingsManager: React.FC = () => {
 
   return (
     <div className="space-y-6 font-mono max-w-4xl">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-5">
+      {/* Consistent Page Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#273244] pb-4">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <AdminBadge variant="vip">SECURITY & CONFIG</AdminBadge>
+            <AdminBadge variant="vip">CONFIGURATION</AdminBadge>
+            <span className="px-1.5 py-0.5 rounded text-[9px] font-mono text-slate-400 bg-[#18212D] border border-[#273244]">
+              POLICY ENGINE
+            </span>
           </div>
-          <h1 className="text-2xl font-bold text-white text-glow-cyan">Platform Settings & Control Gates</h1>
-          <p className="text-xs text-slate-400">Configure corporate parameters, procurement workflow thresholds, and alerts.</p>
+          <h1 className="text-xl sm:text-2xl font-bold text-slate-100 tracking-tight">Platform Parameters & Policy Controls</h1>
+          <p className="text-xs text-slate-400">Configure corporate procurement thresholds, quotation validity windows, and security gates.</p>
         </div>
       </div>
 
       <form onSubmit={handleSave} className="space-y-6">
         {/* General B2B Configuration */}
-        <div className="bg-[#0b0f19] border border-cyan-500/20 rounded-xl p-6 shadow-[0_0_20px_rgba(0,0,0,0.6)] space-y-4">
-          <h3 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2 border-b border-slate-800 pb-3">
-            <Settings className="w-4 h-4 text-cyan-400" />
+        <div className="bg-[#121823] border border-[#273244] rounded-xl p-6 shadow-lg shadow-black/30 space-y-4">
+          <h3 className="text-xs font-bold text-slate-200 uppercase tracking-wider flex items-center gap-2 border-b border-[#273244] pb-3">
+            <Settings className="w-4 h-4 text-[#22D3EE]" />
             <span>Procurement & Quotation Parameters</span>
           </h3>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
             <div>
-              <label className="block text-slate-400 mb-1">Company Trading Name</label>
+              <label className="block text-slate-400 mb-1.5">Company Legal Trading Entity</label>
               <input
                 type="text"
                 defaultValue="Delta Industrial Solutions Private Limited"
-                className="w-full px-3 py-2 rounded-lg bg-[#07090e] border border-slate-700 text-white focus:border-cyan-400 outline-none"
+                className="w-full px-3.5 py-2 rounded-lg bg-[#090B10] border border-[#273244] text-slate-100 focus:border-[#22D3EE] focus:ring-1 focus:ring-[#22D3EE] focus:outline-none transition-colors"
               />
             </div>
 
             <div>
-              <label className="block text-slate-400 mb-1">Corporate Support Email</label>
+              <label className="block text-slate-400 mb-1.5">Corporate Procurement Dispatch Email</label>
               <input
                 type="email"
                 defaultValue="procurement@deltaindustrials.com"
-                className="w-full px-3 py-2 rounded-lg bg-[#07090e] border border-slate-700 text-white focus:border-cyan-400 outline-none"
+                className="w-full px-3.5 py-2 rounded-lg bg-[#090B10] border border-[#273244] text-slate-100 focus:border-[#22D3EE] focus:ring-1 focus:ring-[#22D3EE] focus:outline-none transition-colors"
               />
             </div>
 
             <div>
-              <label className="block text-slate-400 mb-1">Default Quote Validity (Days)</label>
+              <label className="block text-slate-400 mb-1.5">Quotation Validity Period (Days)</label>
               <input
                 type="number"
                 defaultValue={30}
-                className="w-full px-3 py-2 rounded-lg bg-[#07090e] border border-slate-700 text-white focus:border-cyan-400 outline-none"
+                className="w-full px-3.5 py-2 rounded-lg bg-[#090B10] border border-[#273244] text-slate-100 focus:border-[#22D3EE] focus:ring-1 focus:ring-[#22D3EE] focus:outline-none transition-colors"
               />
             </div>
 
             <div>
-              <label className="block text-slate-400 mb-1">Bulk Order Minimum Value (USD)</label>
+              <label className="block text-slate-400 mb-1.5">Enterprise Bulk Order Minimum (USD)</label>
               <input
                 type="number"
                 defaultValue={10000}
-                className="w-full px-3 py-2 rounded-lg bg-[#07090e] border border-slate-700 text-white focus:border-cyan-400 outline-none"
+                className="w-full px-3.5 py-2 rounded-lg bg-[#090B10] border border-[#273244] text-slate-100 focus:border-[#22D3EE] focus:ring-1 focus:ring-[#22D3EE] focus:outline-none transition-colors"
               />
             </div>
           </div>
         </div>
 
         {/* Security Gates */}
-        <div className="bg-[#0b0f19] border border-cyan-500/20 rounded-xl p-6 shadow-[0_0_20px_rgba(0,0,0,0.6)] space-y-4">
-          <h3 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2 border-b border-slate-800 pb-3">
+        <div className="bg-[#121823] border border-[#273244] rounded-xl p-6 shadow-lg shadow-black/30 space-y-4">
+          <h3 className="text-xs font-bold text-slate-200 uppercase tracking-wider flex items-center gap-2 border-b border-[#273244] pb-3">
             <Shield className="w-4 h-4 text-emerald-400" />
-            <span>Security & Zero-Trust Verification</span>
+            <span>Zero-Trust Policy & Audit Enforcement</span>
           </h3>
 
           <div className="space-y-3 text-xs">
-            <label className="flex items-center gap-3 p-3 rounded-lg bg-[#07090e] border border-slate-800 cursor-pointer">
-              <input type="checkbox" defaultChecked className="rounded border-slate-700 text-cyan-400" />
+            <label className="flex items-start gap-3 p-3 rounded-lg bg-[#18212D] border border-[#273244] cursor-pointer hover:border-[#22D3EE]/30 transition-colors">
+              <input type="checkbox" defaultChecked className="mt-0.5 rounded border-[#273244] text-[#22D3EE] focus:ring-0" />
               <div className="space-y-0.5">
-                <div className="text-white font-bold">Enforce Corporate Email Verification for Bulk Quotes</div>
-                <div className="text-slate-400 text-[11px]">Require email confirmation before contractor pricing is unlocked.</div>
+                <div className="text-slate-100 font-bold">Enforce Corporate Email Verification for Bulk RFQs</div>
+                <div className="text-slate-400 text-[11px]">Require email confirmation before contractor discounted pricing is unlocked.</div>
               </div>
             </label>
 
-            <label className="flex items-center gap-3 p-3 rounded-lg bg-[#07090e] border border-slate-800 cursor-pointer">
-              <input type="checkbox" defaultChecked className="rounded border-slate-700 text-cyan-400" />
+            <label className="flex items-start gap-3 p-3 rounded-lg bg-[#18212D] border border-[#273244] cursor-pointer hover:border-[#22D3EE]/30 transition-colors">
+              <input type="checkbox" defaultChecked className="mt-0.5 rounded border-[#273244] text-[#22D3EE] focus:ring-0" />
               <div className="space-y-0.5">
-                <div className="text-white font-bold">Audit Log Write Tracking</div>
-                <div className="text-slate-400 text-[11px]">Record every SKU modification and quotation update in immutable security log.</div>
+                <div className="text-slate-100 font-bold">Immutable Audit Log Recording</div>
+                <div className="text-slate-400 text-[11px]">Record every SKU modification and quotation update in the administrative audit collection.</div>
               </div>
             </label>
           </div>
         </div>
 
-        {/* Submit */}
+        {/* Action Button */}
         <div className="flex items-center justify-between pt-2">
           {saveSuccess ? (
             <div className="flex items-center gap-2 text-xs text-emerald-400 font-bold">
               <CheckCircle2 className="w-4 h-4" />
-              <span>Configuration successfully synchronized.</span>
+              <span>Configuration successfully saved.</span>
             </div>
           ) : (
             <div />
@@ -114,10 +118,10 @@ export const VIPSettingsManager: React.FC = () => {
 
           <button
             type="submit"
-            className="px-6 py-2.5 rounded-lg bg-gradient-to-r from-cyan-400 to-blue-600 hover:from-cyan-300 hover:to-blue-500 text-black font-bold text-xs shadow-[0_0_20px_rgba(0,240,255,0.4)] transition-all flex items-center gap-2"
+            className="px-5 py-2.5 rounded-lg bg-[#22D3EE] hover:bg-[#38BDF8] text-slate-950 font-bold text-xs tracking-wider uppercase transition-colors shadow-sm flex items-center gap-2 focus-visible:ring-1 focus-visible:ring-[#22D3EE] outline-none"
           >
             <Save className="w-4 h-4" />
-            <span>Save Configuration</span>
+            <span>Save Settings</span>
           </button>
         </div>
       </form>

@@ -9,127 +9,147 @@ import { AdminStatCard } from '../components/common/AdminStatCard';
 import { QuickActionsWidget } from '../components/widgets/QuickActionsWidget';
 import { SystemHealthWidget } from '../components/widgets/SystemHealthWidget';
 import { AdminBadge } from '../components/common/AdminBadge';
-import { MessageSquare, ArrowUpRight, Crown, Sparkles, Filter } from 'lucide-react';
+import { MessageSquare, ArrowUpRight, Database } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const recentEnquiriesDemo = [
-  { id: 'ENQ-2026-001', type: 'High-Voltage Cable Run', customer: 'Global Infra Ltd', company: 'Global Infra', date: '2026-10-24', status: 'pending', value: '$45,200 est.' },
-  { id: 'ENQ-2026-002', type: 'Bulk Switchgear Batch', customer: 'Industrial Systems Corp', company: 'Industrial Systems', date: '2026-10-23', status: 'reviewing', value: '$88,400 est.' },
-  { id: 'ENQ-2026-003', type: 'Substation Automation PLC', customer: 'City Power Grid', company: 'City Power', date: '2026-10-23', status: 'quoted', value: '$120,000 est.' },
-  { id: 'ENQ-2026-004', type: 'Marine Grade Power Cable', customer: 'Offshore Electrics Ltd', company: 'Offshore Electrics', date: '2026-10-22', status: 'pending', value: '$32,500 est.' },
+  { id: 'ENQ-2026-001', type: 'High-Voltage Cable Run', customer: 'Global Infra Ltd', date: '2026-10-24', status: 'pending', value: '$45,200' },
+  { id: 'ENQ-2026-002', type: 'Bulk Switchgear Batch', customer: 'Industrial Systems Corp', date: '2026-10-23', status: 'reviewing', value: '$88,400' },
+  { id: 'ENQ-2026-003', type: 'Substation Automation PLC', customer: 'City Power Grid', date: '2026-10-23', status: 'quoted', value: '$120,000' },
+  { id: 'ENQ-2026-004', type: 'Marine Grade Power Cable', customer: 'Offshore Electrics Ltd', date: '2026-10-22', status: 'pending', value: '$32,500' },
 ];
 
 export const VIPDashboard: React.FC = () => {
-  const { metrics, loading } = useAdminStats();
+  const { metrics, loading, error } = useAdminStats();
 
   return (
-    <div className="space-y-8 font-sans">
-      {/* Top Banner */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 rounded-2xl bg-gradient-to-r from-[#0b0f19] via-[#0d1527] to-[#0b0f19] border border-cyan-500/30 shadow-[0_0_40px_rgba(0,240,255,0.1)] relative overflow-hidden">
-        <div className="space-y-1.5 z-10">
-          <div className="flex items-center gap-2">
-            <AdminBadge variant="vip">VIP CONTROL CENTER</AdminBadge>
-            <span className="text-[11px] font-mono text-cyan-400">PHASE 1 ACTIVATED</span>
+    <div className="space-y-6 font-mono">
+      {/* Consistent Page Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#273244] pb-4">
+        <div>
+          <div className="flex items-center gap-2 mb-1">
+            <AdminBadge variant="vip">EXECUTIVE MATRIX</AdminBadge>
+            <span className="text-[10px] text-slate-500 font-mono">CONTROL CENTER v1.0</span>
           </div>
-          <h1 className="text-2xl lg:text-3xl font-extrabold text-white font-mono tracking-tight text-glow-cyan">
-            Enterprise Command Matrix
+          <h1 className="text-xl sm:text-2xl font-bold text-slate-100 tracking-tight">
+            Delta Industrial Command Center
           </h1>
-          <p className="text-xs sm:text-sm text-slate-400 font-mono">
-            High-velocity procurement supervision, live inventory, and zero-trust audit architecture.
+          <p className="text-xs text-slate-400">
+            High-velocity electrical procurement supervision, inventory control, and zero-trust audit architecture.
           </p>
         </div>
 
-        <div className="flex items-center gap-3 z-10 shrink-0">
+        <div className="flex items-center gap-2.5 shrink-0">
           <Link
             to="/admin/products"
-            className="px-4 py-2 rounded-lg bg-gradient-to-r from-cyan-400 to-blue-600 hover:from-cyan-300 hover:to-blue-500 text-black font-mono font-bold text-xs shadow-[0_0_20px_rgba(0,240,255,0.4)] transition-all flex items-center gap-1.5"
+            className="px-3.5 py-2 rounded-lg bg-[#18212D] border border-[#273244] hover:border-[#22D3EE]/50 hover:bg-[#1E293B] text-slate-200 hover:text-white font-mono text-xs transition-colors flex items-center gap-1.5 focus-visible:ring-1 focus-visible:ring-[#22D3EE] outline-none"
           >
-            <span>Manage Catalog</span>
-            <ArrowUpRight className="w-4 h-4" />
+            <span>Catalog Items</span>
+            <ArrowUpRight className="w-3.5 h-3.5 text-slate-400" />
+          </Link>
+          <Link
+            to="/admin/enquiries"
+            className="px-3.5 py-2 rounded-lg bg-[#22D3EE] hover:bg-[#38BDF8] text-slate-950 font-mono font-bold text-xs tracking-wider uppercase transition-colors shadow-sm flex items-center gap-1.5 focus-visible:ring-1 focus-visible:ring-[#22D3EE] outline-none"
+          >
+            <span>Review Quotes</span>
+            <ArrowUpRight className="w-3.5 h-3.5 text-slate-950" />
           </Link>
         </div>
-
-        {/* Decorative Grid Backdrop */}
-        <div className="absolute inset-0 bg-industrial-grid opacity-20 pointer-events-none" />
       </div>
 
       {/* Primary KPI Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {loading
           ? Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className="h-32 bg-[#0b0f19] border border-cyan-500/10 rounded-xl animate-pulse" />
+              <AdminStatCard key={i} loading={true} />
+            ))
+          : error
+          ? Array.from({ length: 4 }).map((_, i) => (
+              <AdminStatCard key={i} error={error} />
             ))
           : metrics.map((metric) => (
               <AdminStatCard key={metric.id} metric={metric} />
             ))}
       </div>
 
-      {/* Main Grid: Live Queue & Operations */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
+      {/* Main Grid: Priority Enquiries Queue & Operational Widgets */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Enquiries Queue (Left 2 columns) */}
-        <div className="lg:col-span-2 bg-[#0b0f19] border border-cyan-500/20 rounded-xl shadow-[0_0_20px_rgba(0,0,0,0.6)] overflow-hidden">
-          <div className="p-5 border-b border-slate-800 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <MessageSquare className="w-5 h-5 text-cyan-400" />
-              <h2 className="text-sm font-mono font-bold text-white uppercase tracking-wider">
-                Priority Procurement Enquiries
-              </h2>
+        <div className="lg:col-span-2 bg-[#121823] border border-[#273244] rounded-xl shadow-lg shadow-black/30 overflow-hidden flex flex-col justify-between">
+          <div>
+            <div className="p-4 border-b border-[#273244] flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <MessageSquare className="w-4 h-4 text-[#22D3EE]" />
+                <h2 className="text-xs font-mono font-bold text-slate-200 uppercase tracking-wider">
+                  Priority Procurement Enquiries
+                </h2>
+                <span className="px-1.5 py-0.5 rounded text-[9px] font-mono text-slate-400 bg-[#18212D] border border-[#273244]">
+                  DEMO SAMPLE QUEUE
+                </span>
+              </div>
+              <Link 
+                to="/admin/enquiries" 
+                className="text-xs font-mono text-[#22D3EE] hover:underline flex items-center gap-1 focus-visible:ring-1 focus-visible:ring-[#22D3EE] outline-none"
+              >
+                <span>View Full Queue</span>
+                <ArrowUpRight className="w-3.5 h-3.5" />
+              </Link>
             </div>
-            <Link 
-              to="/admin/enquiries" 
-              className="text-xs font-mono text-cyan-400 hover:text-cyan-300 flex items-center gap-1"
-            >
-              <span>Inspect All</span>
-              <ArrowUpRight className="w-3.5 h-3.5" />
-            </Link>
+
+            <div className="overflow-x-auto custom-scrollbar">
+              <table className="w-full text-left font-mono">
+                <thead>
+                  <tr className="bg-[#0D1118] text-[11px] font-semibold text-slate-400 uppercase tracking-wider border-b border-[#273244]">
+                    <th className="px-4 py-3">Tracking ID</th>
+                    <th className="px-4 py-3">Requirement</th>
+                    <th className="px-4 py-3">Client Entity</th>
+                    <th className="px-4 py-3">Est. Value</th>
+                    <th className="px-4 py-3">Status</th>
+                    <th className="px-4 py-3 text-right">Action</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-[#273244]/60 text-xs text-slate-300">
+                  {recentEnquiriesDemo.map((enq) => (
+                    <tr key={enq.id} className="hover:bg-[#18212D]/70 transition-colors group">
+                      <td className="px-4 py-3 font-bold text-[#22D3EE]">{enq.id}</td>
+                      <td className="px-4 py-3 text-slate-200">{enq.type}</td>
+                      <td className="px-4 py-3 text-slate-400">{enq.customer}</td>
+                      <td className="px-4 py-3 text-emerald-400 font-bold">{enq.value}</td>
+                      <td className="px-4 py-3">
+                        <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase border ${
+                          enq.status === 'pending'
+                            ? 'bg-amber-950/40 text-amber-300 border-amber-500/30'
+                            : enq.status === 'reviewing'
+                            ? 'bg-blue-950/40 text-blue-300 border-blue-500/30'
+                            : 'bg-emerald-950/40 text-emerald-300 border-emerald-500/30'
+                        }`}>
+                          {enq.status}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 text-right">
+                        <Link
+                          to="/admin/enquiries"
+                          className="text-xs text-slate-400 group-hover:text-[#22D3EE] transition-colors focus-visible:ring-1 focus-visible:ring-[#22D3EE] outline-none rounded p-0.5"
+                        >
+                          Inspect →
+                        </Link>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
 
-          <div className="overflow-x-auto custom-scrollbar">
-            <table className="w-full text-left font-mono">
-              <thead>
-                <tr className="bg-[#07090e] text-[11px] font-bold text-slate-400 uppercase tracking-wider border-b border-slate-800">
-                  <th className="px-5 py-3">Tracking ID</th>
-                  <th className="px-5 py-3">Project / Type</th>
-                  <th className="px-5 py-3">Client Entity</th>
-                  <th className="px-5 py-3">Est. Value</th>
-                  <th className="px-5 py-3">Status</th>
-                  <th className="px-5 py-3 text-right">Action</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-800/80 text-xs text-slate-300">
-                {recentEnquiriesDemo.map((enq) => (
-                  <tr key={enq.id} className="hover:bg-cyan-950/20 transition-colors group">
-                    <td className="px-5 py-3.5 font-bold text-cyan-400">{enq.id}</td>
-                    <td className="px-5 py-3.5 text-slate-200">{enq.type}</td>
-                    <td className="px-5 py-3.5 text-slate-400">{enq.customer}</td>
-                    <td className="px-5 py-3.5 text-emerald-400 font-bold">{enq.value}</td>
-                    <td className="px-5 py-3.5">
-                      <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
-                        enq.status === 'pending'
-                          ? 'bg-amber-950/60 text-amber-300 border border-amber-500/30'
-                          : enq.status === 'reviewing'
-                          ? 'bg-blue-950/60 text-blue-300 border border-blue-500/30'
-                          : 'bg-emerald-950/60 text-emerald-300 border border-emerald-500/30'
-                      }`}>
-                        {enq.status}
-                      </span>
-                    </td>
-                    <td className="px-5 py-3.5 text-right">
-                      <Link
-                        to="/admin/enquiries"
-                        className="text-xs text-slate-400 group-hover:text-cyan-400 transition-colors"
-                      >
-                        Inspect →
-                      </Link>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <div className="p-3 border-t border-[#273244]/60 bg-[#0D1118]/40 flex items-center justify-between text-[11px] text-slate-500">
+            <span>Showing priority pipeline entries</span>
+            <Link to="/admin/enquiries" className="text-slate-400 hover:text-slate-200 transition-colors">
+              Manage complete database table →
+            </Link>
           </div>
         </div>
 
-        {/* Right Column: Widgets */}
+        {/* Right Column: Operational & Health Widgets */}
         <div className="space-y-6">
           <QuickActionsWidget />
           <SystemHealthWidget />

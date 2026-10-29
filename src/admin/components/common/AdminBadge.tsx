@@ -5,32 +5,63 @@
 
 import React from 'react';
 import { AdminStatusBadgeVariant } from '../../types/admin.types';
+import { Check, AlertTriangle, AlertCircle, Info, Crown, Circle } from 'lucide-react';
 
 interface AdminBadgeProps {
-  variant?: AdminStatusBadgeVariant;
+  variant?: AdminStatusBadgeVariant | string;
   children: React.ReactNode;
   className?: string;
+  showIcon?: boolean;
 }
 
 export const AdminBadge: React.FC<AdminBadgeProps> = ({ 
   variant = 'default', 
   children, 
-  className = '' 
+  className = '',
+  showIcon = true
 }) => {
+  const safeVariant: AdminStatusBadgeVariant = (
+    variant === 'success' || 
+    variant === 'warning' || 
+    variant === 'error' || 
+    variant === 'info' || 
+    variant === 'vip'
+  ) ? variant : 'default';
+
   const variantStyles: Record<AdminStatusBadgeVariant, string> = {
-    default: 'bg-slate-800 text-slate-300 border-slate-700',
-    success: 'bg-emerald-950/80 text-emerald-400 border-emerald-500/40 shadow-[0_0_10px_rgba(16,185,129,0.15)]',
-    warning: 'bg-amber-950/80 text-amber-300 border-amber-500/40 shadow-[0_0_10px_rgba(245,158,11,0.15)]',
-    error: 'bg-rose-950/80 text-rose-400 border-rose-500/40 shadow-[0_0_10px_rgba(244,63,94,0.15)]',
-    info: 'bg-cyan-950/80 text-cyan-300 border-cyan-500/40 shadow-[0_0_10px_rgba(6,182,212,0.15)]',
-    vip: 'bg-gradient-to-r from-amber-500/20 via-purple-500/20 to-cyan-500/20 text-amber-300 border-amber-500/50 shadow-[0_0_15px_rgba(245,158,11,0.25)]',
+    default: 'bg-[#18212D] text-slate-300 border-[#273244]',
+    success: 'bg-emerald-950/60 text-emerald-400 border-emerald-500/40',
+    warning: 'bg-amber-950/60 text-amber-300 border-amber-500/40',
+    error: 'bg-red-950/60 text-red-400 border-red-500/40',
+    info: 'bg-cyan-950/60 text-[#22D3EE] border-[#22D3EE]/40',
+    vip: 'bg-[#F5A623]/15 text-[#F5A623] border-[#F5A623]/40 shadow-sm',
+  };
+
+  const renderIcon = () => {
+    if (!showIcon) return null;
+    switch (safeVariant) {
+      case 'success':
+        return <Check className="w-3 h-3 text-emerald-400 shrink-0" aria-hidden="true" />;
+      case 'warning':
+        return <AlertTriangle className="w-3 h-3 text-amber-300 shrink-0" aria-hidden="true" />;
+      case 'error':
+        return <AlertCircle className="w-3 h-3 text-red-400 shrink-0" aria-hidden="true" />;
+      case 'info':
+        return <Info className="w-3 h-3 text-[#22D3EE] shrink-0" aria-hidden="true" />;
+      case 'vip':
+        return <Crown className="w-3 h-3 text-[#F5A623] shrink-0" aria-hidden="true" />;
+      case 'default':
+      default:
+        return <Circle className="w-2 h-2 fill-current text-slate-400 shrink-0" aria-hidden="true" />;
+    }
   };
 
   return (
     <span 
-      className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-mono font-semibold uppercase tracking-wider border ${variantStyles[variant]} ${className}`}
+      className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-mono font-semibold uppercase tracking-wider border ${variantStyles[safeVariant]} ${className}`}
     >
-      {children}
+      {renderIcon()}
+      <span>{children ?? 'Unknown'}</span>
     </span>
   );
 };

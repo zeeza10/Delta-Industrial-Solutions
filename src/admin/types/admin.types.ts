@@ -7,6 +7,8 @@ export type AdminRole = 'super_admin' | 'procurement_admin' | 'catalog_manager' 
 
 export type AdminStatusBadgeVariant = 'default' | 'success' | 'warning' | 'error' | 'info' | 'vip';
 
+export type HealthProbeStatus = 'connected' | 'disconnected' | 'checking' | 'unconfigured';
+
 export interface AdminUserCapability {
   canManageProducts: boolean;
   canManagePricing: boolean;
@@ -21,6 +23,7 @@ export interface AdminMetricSummary {
   id: string;
   title: string;
   value: string | number;
+  description?: string;
   changePercent?: number;
   isPositiveChange?: boolean;
   trendText?: string;
@@ -52,6 +55,11 @@ export interface AdminFilterState {
 }
 
 export interface SystemHealthStatus {
+  databaseStatus: HealthProbeStatus;
+  authStatus: HealthProbeStatus;
+  lastChecked: string | null;
+  errorMessage?: string;
+  // Backward compatibility
   databaseConnected: boolean;
   authConnected: boolean;
   storageConnected: boolean;

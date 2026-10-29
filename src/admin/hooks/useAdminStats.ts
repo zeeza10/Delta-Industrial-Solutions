@@ -7,6 +7,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { AdminMetricSummary } from '../types/admin.types';
 import { db } from '../../lib/firebase';
 import { collection, getDocs, query, limit } from 'firebase/firestore';
+import { PRODUCTS } from '../../data/products';
 
 export const useAdminStats = () => {
   const [metrics, setMetrics] = useState<AdminMetricSummary[]>([]);
@@ -17,62 +18,57 @@ export const useAdminStats = () => {
     setLoading(true);
     setError(null);
     try {
-      let productCount = 54;
-      let enquiryCount = 12;
+      let productCount = PRODUCTS.length;
+      let enquiryCount = 4;
+      let isLiveDb = false;
 
       if (db) {
         try {
-          const prodSnap = await getDocs(query(collection(db, 'products'), limit(100)));
+          const prodSnap = await getDocs(query(collection(db, 'products'), limit(150)));
           if (!prodSnap.empty) {
             productCount = prodSnap.size;
+            isLiveDb = true;
           }
-          const enqSnap = await getDocs(query(collection(db, 'enquiries'), limit(100)));
+          const enqSnap = await getDocs(query(collection(db, 'enquiries'), limit(150)));
           if (!enqSnap.empty) {
             enquiryCount = enqSnap.size;
+            isLiveDb = true;
           }
         } catch {
-          // Use default simulated metrics if Firestore read fails
+          // Fall back gracefully to base catalog counts
         }
       }
 
       setMetrics([
         {
           id: 'total_products',
-          title: 'Total Catalog SKUs',
+          title: 'Catalog SKUs',
           value: productCount,
-          changePercent: 8.4,
-          isPositiveChange: true,
-          trendText: '+4 added this week',
+          description: isLiveDb ? 'Live Firestore records' : 'Catalog repository',
           iconName: 'Package',
           highlightVariant: 'info',
         },
         {
           id: 'active_enquiries',
-          title: 'Active Quotation Enquiries',
+          title: 'Procurement RFQs',
           value: enquiryCount,
-          changePercent: 14.2,
-          isPositiveChange: true,
-          trendText: '3 urgent requests pending review',
+          description: 'Awaiting quotation response',
           iconName: 'MessageSquare',
           highlightVariant: 'warning',
         },
         {
           id: 'b2b_users',
-          title: 'Verified B2B Enterprise Accounts',
-          value: 128,
-          changePercent: 12.0,
-          isPositiveChange: true,
-          trendText: '+16 approved this month',
+          title: 'Enterprise Accounts',
+          value: 4,
+          description: 'Verified contractor entities',
           iconName: 'Users',
           highlightVariant: 'vip',
         },
         {
           id: 'avg_turnaround',
-          title: 'Avg. Quote Turnaround',
-          value: '3.8h',
-          changePercent: -15.5,
-          isPositiveChange: true,
-          trendText: 'Fast response rate maintained',
+          title: 'Quotation Window',
+          value: '24-48h',
+          description: 'Target SLA benchmark',
           iconName: 'Clock',
           highlightVariant: 'success',
         },
