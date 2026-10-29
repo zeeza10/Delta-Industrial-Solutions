@@ -6,7 +6,6 @@
 import React, { Suspense, lazy } from 'react';
 import { RouteObject } from 'react-router-dom';
 import { MainLayout } from '../components/layout/MainLayout';
-import { AdminLayout } from '../components/admin/AdminLayout';
 import { 
   Info, 
   Mail, 
@@ -39,7 +38,13 @@ const StyleShowcase = lazy(() => import('../pages/StyleShowcase').then(m => ({ d
 const NotFound = lazy(() => import('../pages/NotFound').then(m => ({ default: m.NotFound })));
 
 // Admin Lazy Routes
-const AdminDashboard = lazy(() => import('../pages/admin/Dashboard').then(m => ({ default: m.AdminDashboard })));
+const VIPAdminLayout = lazy(() => import('../admin/components/layout/VIPAdminLayout').then(m => ({ default: m.VIPAdminLayout })));
+const VIPDashboard = lazy(() => import('../admin/pages/VIPDashboard').then(m => ({ default: m.VIPDashboard })));
+const VIPCategoryManager = lazy(() => import('../admin/pages/VIPCategoryManager').then(m => ({ default: m.VIPCategoryManager })));
+const VIPBrandManager = lazy(() => import('../admin/pages/VIPBrandManager').then(m => ({ default: m.VIPBrandManager })));
+const VIPUserManager = lazy(() => import('../admin/pages/VIPUserManager').then(m => ({ default: m.VIPUserManager })));
+const VIPAnalytics = lazy(() => import('../admin/pages/VIPAnalytics').then(m => ({ default: m.VIPAnalytics })));
+const VIPSettingsManager = lazy(() => import('../admin/pages/VIPSettingsManager').then(m => ({ default: m.VIPSettingsManager })));
 const AdminProducts = lazy(() => import('../pages/admin/Products').then(m => ({ default: m.AdminProducts })));
 const AdminEnquiries = lazy(() => import('../pages/admin/Enquiries').then(m => ({ default: m.AdminEnquiries })));
 
@@ -156,11 +161,11 @@ export const routerConfig: RouteObject[] = [
   },
   {
     path: '/admin',
-    element: <AdminLayout />,
+    element: withSuspense(VIPAdminLayout),
     children: [
       {
         index: true,
-        element: withSuspense(AdminDashboard),
+        element: withSuspense(VIPDashboard),
       },
       {
         path: 'products',
@@ -172,19 +177,23 @@ export const routerConfig: RouteObject[] = [
       },
       {
         path: 'categories',
-        element: <PlaceholderPage title="Manage Categories" icon={Layers} />,
+        element: withSuspense(VIPCategoryManager),
       },
       {
         path: 'brands',
-        element: <PlaceholderPage title="Manage Brands" icon={Tag} />,
+        element: withSuspense(VIPBrandManager),
       },
       {
         path: 'users',
-        element: <PlaceholderPage title="User Management" icon={Users} />,
+        element: withSuspense(VIPUserManager),
+      },
+      {
+        path: 'analytics',
+        element: withSuspense(VIPAnalytics),
       },
       {
         path: 'settings',
-        element: <PlaceholderPage title="Site Settings" icon={Settings} />,
+        element: withSuspense(VIPSettingsManager),
       },
     ],
   },
