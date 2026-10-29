@@ -1,12 +1,11 @@
 {
-  "projectId": "starlit-yarn-qw2pc",
-  "appId": "1:488327947694:web:3d5bdba2283f1bb7d2d43f",
-  "apiKey": "AIzaSyCtzkhJqJUJpCSqJ86ckSmwxdlnoYm5oZs",
-  "authDomain": "starlit-yarn-qw2pc.firebaseapp.com",
-  "firestoreDatabaseId": "ai-studio-deltaindustrials-294d38e2-280c-4fa1-b532-77b02f3043ba",
-  "storageBucket": "starlit-yarn-qw2pc.firebasestorage.app",
-  "messagingSenderId": "488327947694",
+  "projectId": "coral-gist-q5v9p",
+  "appId": "1:657493624370:web:d31264d16c15ef4bd81e2b",
+  "apiKey": "AIzaSyDNP2SVhXLfh-NuT2cJ3Mr_2Nu0kz2RM5U",
+  "authDomain": "coral-gist-q5v9p.firebaseapp.com",
+  "storageBucket": "coral-gist-q5v9p.firebasestorage.app",
+  "messagingSenderId": "657493624370",
   "measurementId": "",
-  "oAuthClientId": "488327947694-c55at68v98442j3htljk93l9mqv0kgu2.apps.googleusercontent.com",
+  "oAuthClientId": "657493624370-49h8oc65343t06evb9qq9cqoudak48l7.apps.googleusercontent.com",
   "recaptchaSiteKey": ""
 }

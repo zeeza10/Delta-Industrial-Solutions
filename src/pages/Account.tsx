@@ -57,6 +57,8 @@ export const Account: React.FC = () => {
   const { 
     user, 
     profile, 
+    isOwner,
+    isAdmin,
     loading: authLoading, 
     signOut, 
     updateUserProfile, 
@@ -371,11 +373,15 @@ export const Account: React.FC = () => {
                 <h1 className="text-xl sm:text-2xl font-bold text-white">
                   {profile?.displayName || user.displayName || 'Authorized Representative'}
                 </h1>
-                {profile?.role === 'admin' && (
+                {isOwner ? (
+                  <span className="px-2 py-0.5 bg-amber-400 text-slate-900 font-bold text-[10px] rounded uppercase tracking-wider flex items-center gap-1 shadow-sm">
+                    System Owner
+                  </span>
+                ) : isAdmin ? (
                   <span className="px-2 py-0.5 bg-teal text-navy font-bold text-[10px] rounded uppercase tracking-wider">
                     Administrator
                   </span>
-                )}
+                ) : null}
               </div>
               <p className="text-xs sm:text-sm text-slate-300 flex items-center gap-2 mt-1">
                 <span>{user.email}</span>
@@ -389,7 +395,16 @@ export const Account: React.FC = () => {
             </div>
           </div>
 
-          <div className="flex items-center gap-3 self-stretch md:self-auto">
+          <div className="flex flex-wrap items-center gap-3 self-stretch md:self-auto">
+            {isAdmin && (
+              <Link
+                to="/admin"
+                className="px-3.5 py-2 bg-gradient-to-r from-teal to-cyan-500 hover:from-cyan-400 hover:to-teal text-navy font-bold rounded-lg text-xs transition-all shadow-md flex items-center gap-1.5"
+              >
+                <ShieldCheck className="w-4 h-4" />
+                <span>VIP Admin Panel</span>
+              </Link>
+            )}
             <button
               onClick={() => signOut()}
               className="px-4 py-2 bg-white/10 hover:bg-red-500/20 text-white hover:text-red-300 border border-white/15 rounded-lg text-xs font-semibold transition-all flex items-center gap-2"

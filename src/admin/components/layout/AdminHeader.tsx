@@ -22,9 +22,10 @@ import {
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../../context/AuthContext';
 import { useAdmin } from '../../context/AdminContext';
+import { logAdminSignOut } from '../../utils/adminAudit';
 
 export const AdminHeader: React.FC = () => {
-  const { user, profile, signOut } = useAuth();
+  const { user, profile, isOwner, role, signOut } = useAuth();
   const { 
     systemHealth, 
     refreshSystemHealth, 
@@ -33,6 +34,14 @@ export const AdminHeader: React.FC = () => {
     isSidebarCollapsed 
   } = useAdmin();
   const location = useLocation();
+
+  const roleLabel = isOwner 
+    ? 'System Owner' 
+    : role === 'admin' 
+    ? 'Executive Admin' 
+    : role === 'manager' 
+    ? 'Operations Manager' 
+    : 'Administrator';
 
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
@@ -188,12 +197,16 @@ export const AdminHeader: React.FC = () => {
             <div className="text-right hidden sm:block">
               <div className="flex items-center justify-end gap-1.5">
                 <span className="text-xs font-mono font-bold text-slate-100 truncate max-w-[120px]">
-                  {user?.displayName || 'VIP Admin'}
+                  {user?.displayName || (isOwner ? 'System Owner' : 'VIP Admin')}
                 </span>
-                <Crown className="w-3.5 h-3.5 text-[#F5A623] shrink-0" />
+                {isOwner ? (
+                  <Crown className="w-3.5 h-3.5 text-[#F5A623] shrink-0" />
+                ) : (
+                  <Shield className="w-3.5 h-3.5 text-[#22D3EE] shrink-0" />
+                )}
               </div>
               <span className="text-[10px] font-mono text-slate-400 block truncate max-w-[130px]">
-                {profile?.role === 'admin' ? 'Super Admin' : 'Admin Session'}
+                {roleLabel}
               </span>
             </div>
 
@@ -210,10 +223,18 @@ export const AdminHeader: React.FC = () => {
           {isUserMenuOpen && (
             <div className="absolute right-0 mt-2 w-64 rounded-xl bg-[#121823] border border-[#273244] shadow-2xl p-3 text-xs font-mono z-50 space-y-3">
               <div className="p-2.5 rounded-lg bg-[#18212D] border border-[#273244] space-y-1">
-                <p className="font-bold text-slate-100 truncate">{user?.displayName || 'Administrator'}</p>
+                <p className="font-bold text-slate-100 truncate">
+                  {user?.displayName || (isOwner ? 'System Owner' : 'Administrator')}
+                </p>
                 <p className="text-[11px] text-slate-400 truncate">{user?.email || 'admin@deltaindustrials.com'}</p>
-                <span className="inline-block mt-1 px-2 py-0.5 rounded text-[10px] font-bold bg-[#F5A623]/15 text-[#F5A623] border border-[#F5A623]/30 uppercase">
-                  {profile?.role === 'admin' ? 'Super Admin' : 'Admin'}
+                <span className={`inline-block mt-1 px-2 py-0.5 rounded text-[10px] font-bold uppercase border ${
+                  isOwner 
+                    ? 'bg-[#F5A623]/15 text-[#F5A623] border-[#F5A623]/30'
+                    : role === 'admin'
+                    ? 'bg-[#22D3EE]/15 text-[#22D3EE] border-[#22D3EE]/30'
+                    : 'bg-slate-700 text-slate-300 border-slate-600'
+                }`}>
+                  {roleLabel}
                 </span>
               </div>
 
@@ -238,9 +259,12 @@ export const AdminHeader: React.FC = () => {
 
               <div className="border-t border-[#273244] pt-2">
                 <button
-                  onClick={() => {
+                  onClick={async () => {
                     setIsUserMenuOpen(false);
-                    signOut();
+                    if (user) {
+                      await logAdminSignOut(user.uid, user.email || '', user.displayName || user.email || 'Admin');
+                    }
+                    await signOut();
                   }}
                   className="flex items-center gap-2 w-full px-3 py-2 text-left rounded-lg text-red-400 hover:text-red-300 hover:bg-red-950/20 transition-colors"
                 >

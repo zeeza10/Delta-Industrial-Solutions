@@ -17,6 +17,14 @@ const VIPSettingsManager = lazy(() => import('../pages/VIPSettingsManager').then
 
 const VIPProductManager = lazy(() => import('../pages/VIPProductManager').then(m => ({ default: m.VIPProductManager })));
 const VIPEnquiryManager = lazy(() => import('../pages/VIPEnquiryManager').then(m => ({ default: m.VIPEnquiryManager })));
+const VIPAdminLogin = lazy(() => import('../pages/VIPAdminLogin').then(m => ({ default: m.VIPAdminLogin })));
+const VIPGmailHub = lazy(() => import('../pages/VIPGmailHub').then(m => ({ default: m.VIPGmailHub })));
+const VIPInventoryDashboard = lazy(() => import('../pages/VIPInventoryDashboard').then(m => ({ default: m.VIPInventoryDashboard })));
+
+// CMS & Media Library Modules
+const CMSManager = lazy(() => import('../pages/cms/CMSManager').then(m => ({ default: m.CMSManager })));
+const CMSPageEditor = lazy(() => import('../pages/cms/CMSPageEditor').then(m => ({ default: m.CMSPageEditor })));
+const MediaLibrary = lazy(() => import('../pages/cms/MediaLibrary').then(m => ({ default: m.MediaLibrary })));
 
 // Accessible loading fallback for admin sub-routes
 const AdminFallback: React.FC = () => (
@@ -53,12 +61,36 @@ export const adminRoutes: RouteObject = {
       element: withAdminSuspense(VIPDashboard),
     },
     {
+      path: 'login',
+      element: withAdminSuspense(VIPAdminLogin),
+    },
+    {
       path: 'products',
+      element: withAdminSuspense(VIPProductManager),
+    },
+    {
+      path: 'products/new',
+      element: withAdminSuspense(VIPProductManager),
+    },
+    {
+      path: 'products/:id',
+      element: withAdminSuspense(VIPProductManager),
+    },
+    {
+      path: 'products/:id/edit',
       element: withAdminSuspense(VIPProductManager),
     },
     {
       path: 'enquiries',
       element: withAdminSuspense(VIPEnquiryManager),
+    },
+    {
+      path: 'gmail',
+      element: withAdminSuspense(VIPGmailHub),
+    },
+    {
+      path: 'inventory',
+      element: withAdminSuspense(VIPInventoryDashboard),
     },
     {
       path: 'categories',
@@ -67,6 +99,38 @@ export const adminRoutes: RouteObject = {
     {
       path: 'brands',
       element: withAdminSuspense(VIPBrandManager),
+    },
+    {
+      path: 'cms',
+      element: withAdminSuspense(CMSManager),
+    },
+    {
+      path: 'cms/pages',
+      element: withAdminSuspense(CMSManager),
+    },
+    {
+      path: 'cms/new',
+      element: withAdminSuspense(CMSPageEditor),
+    },
+    {
+      path: 'cms/pages/new',
+      element: withAdminSuspense(CMSPageEditor),
+    },
+    {
+      path: 'cms/edit/:id',
+      element: withAdminSuspense(CMSPageEditor),
+    },
+    {
+      path: 'cms/pages/:id/edit',
+      element: withAdminSuspense(CMSPageEditor),
+    },
+    {
+      path: 'media',
+      element: withAdminSuspense(MediaLibrary),
+    },
+    {
+      path: 'cms/media',
+      element: withAdminSuspense(MediaLibrary),
     },
     {
       path: 'users',

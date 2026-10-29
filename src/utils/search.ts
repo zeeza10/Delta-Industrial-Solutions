@@ -118,7 +118,7 @@ export const searchProducts = (
       case 'price-high':
         return (b.price || 0) - (a.price || 0);
       case 'newest':
-        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+        return new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime();
       case 'relevance':
       default:
         // Simple relevance for now: exact matches on SKU or name start higher

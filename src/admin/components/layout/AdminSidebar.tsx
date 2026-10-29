@@ -19,27 +19,45 @@ import {
   ChevronLeft,
   ChevronRight,
   ShieldCheck,
+  FileText,
+  Image as ImageIcon,
+  Mail,
+  History,
   LucideIcon
 } from 'lucide-react';
 import { useAuth } from '../../../context/AuthContext';
 import { useAdmin } from '../../context/AdminContext';
+import { useAdminPermissions } from '../../hooks/useAdminPermissions';
 import { ADMIN_NAV_GROUPS, AdminNavItem } from '../../constants/adminConstants';
+import { logAdminSignOut } from '../../utils/adminAudit';
 
 const iconMap: Record<string, LucideIcon> = {
   LayoutDashboard,
   BarChart3,
   MessageSquare,
+  Mail,
   Package,
   Layers,
   Tag,
+  FileText,
+  ImageIcon,
+  History,
   Users,
   Settings,
 };
 
 export const AdminSidebar: React.FC = () => {
-  const { signOut } = useAuth();
+  const { user, signOut } = useAuth();
   const { isSidebarCollapsed, toggleSidebar, isMobileMenuOpen, closeMobileMenu } = useAdmin();
+  const { canAccessRoute } = useAdminPermissions();
   const location = useLocation();
+
+  const handleSignOut = async () => {
+    if (user) {
+      await logAdminSignOut(user.uid, user.email || '', user.displayName || user.email || 'Admin');
+    }
+    await signOut();
+  };
 
   return (
     <>
@@ -99,49 +117,54 @@ export const AdminSidebar: React.FC = () => {
           className="flex-1 overflow-y-auto px-3 py-4 space-y-4 custom-scrollbar"
           aria-label="Admin Navigation Links"
         >
-          {ADMIN_NAV_GROUPS.map((group) => (
-            <div key={group.id} className="space-y-1">
-              {!isSidebarCollapsed && (
-                <div className="px-3 pt-1 pb-1 text-[10px] font-mono font-semibold uppercase tracking-wider text-slate-500 truncate">
-                  {group.label}
-                </div>
-              )}
-              {group.items.map((item: AdminNavItem) => {
-                const isActive = location.pathname === item.path;
-                const IconComponent = iconMap[item.iconName] || LayoutDashboard;
+          {ADMIN_NAV_GROUPS.map((group) => {
+            const accessibleItems = group.items.filter(item => canAccessRoute(item.path));
+            if (accessibleItems.length === 0) return null;
 
-                return (
-                  <Link
-                    key={item.path}
-                    to={item.path}
-                    onClick={closeMobileMenu}
-                    title={isSidebarCollapsed ? item.name : undefined}
-                    aria-label={item.name}
-                    aria-current={isActive ? 'page' : undefined}
-                    className={`
-                      flex items-center gap-3 px-3 py-2 rounded-lg text-xs font-mono font-medium transition-colors group relative
-                      focus-visible:ring-1 focus-visible:ring-[#22D3EE] outline-none
-                      ${isActive 
-                        ? 'bg-[#18212D] text-[#22D3EE] border border-[#273244] shadow-sm font-semibold' 
-                        : 'text-slate-400 hover:text-slate-100 hover:bg-[#18212D]/60 border border-transparent'
-                      }
-                      ${isSidebarCollapsed ? 'justify-center' : ''}
-                    `}
-                  >
-                    <IconComponent className={`w-4 h-4 shrink-0 transition-colors ${isActive ? 'text-[#22D3EE]' : 'text-slate-400 group-hover:text-slate-200'}`} />
-                    {!isSidebarCollapsed && (
-                      <span className="truncate flex-1">{item.name}</span>
-                    )}
-                    {!isSidebarCollapsed && item.badge && (
-                      <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-[#22D3EE]/10 text-[#22D3EE] border border-[#22D3EE]/30">
-                        {item.badge}
-                      </span>
-                    )}
-                  </Link>
-                );
-              })}
-            </div>
-          ))}
+            return (
+              <div key={group.id} className="space-y-1">
+                {!isSidebarCollapsed && (
+                  <div className="px-3 pt-1 pb-1 text-[10px] font-mono font-semibold uppercase tracking-wider text-slate-500 truncate">
+                    {group.label}
+                  </div>
+                )}
+                {accessibleItems.map((item: AdminNavItem) => {
+                  const isActive = location.pathname === item.path || (item.path === '/admin/cms' && location.pathname.startsWith('/admin/cms'));
+                  const IconComponent = iconMap[item.iconName] || LayoutDashboard;
+
+                  return (
+                    <Link
+                      key={item.path}
+                      to={item.path}
+                      onClick={closeMobileMenu}
+                      title={isSidebarCollapsed ? item.name : undefined}
+                      aria-label={item.name}
+                      aria-current={isActive ? 'page' : undefined}
+                      className={`
+                        flex items-center gap-3 px-3 py-2 rounded-lg text-xs font-mono font-medium transition-colors group relative
+                        focus-visible:ring-1 focus-visible:ring-[#22D3EE] outline-none
+                        ${isActive 
+                          ? 'bg-[#18212D] text-[#22D3EE] border border-[#273244] shadow-sm font-semibold' 
+                          : 'text-slate-400 hover:text-slate-100 hover:bg-[#18212D]/60 border border-transparent'
+                        }
+                        ${isSidebarCollapsed ? 'justify-center' : ''}
+                      `}
+                    >
+                      <IconComponent className={`w-4 h-4 shrink-0 transition-colors ${isActive ? 'text-[#22D3EE]' : 'text-slate-400 group-hover:text-slate-200'}`} />
+                      {!isSidebarCollapsed && (
+                        <span className="truncate flex-1">{item.name}</span>
+                      )}
+                      {!isSidebarCollapsed && item.badge && (
+                        <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-[#22D3EE]/10 text-[#22D3EE] border border-[#22D3EE]/30">
+                          {item.badge}
+                        </span>
+                      )}
+                    </Link>
+                  );
+                })}
+              </div>
+            );
+          })}
         </nav>
 
         {/* Bottom Section: Security Seal & Sidebar Collapse Toggle */}
@@ -158,7 +181,7 @@ export const AdminSidebar: React.FC = () => {
 
           <div className="flex items-center gap-2">
             <button
-              onClick={() => signOut()}
+              onClick={handleSignOut}
               className={`
                 flex items-center gap-2 px-3 py-2 text-xs font-mono text-slate-400 hover:text-red-400 hover:bg-red-950/20 rounded-lg border border-transparent hover:border-red-500/20 transition-all flex-1
                 focus-visible:ring-1 focus-visible:ring-red-400 outline-none

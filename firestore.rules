@@ -1,12 +1,12 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Default Deny
+    // --- 1. Master Gate / Default Deny ---
     match /{document=**} {
       allow read, write: if false;
     }
 
-    // --- Helpers ---
+    // --- 2. Identity & Role Helpers ---
     function isSignedIn() {
       return request.auth != null;
     }
@@ -15,11 +15,39 @@ service cloud.firestore {
       return request.auth.token.email_verified == true;
     }
 
-    function isAdmin() {
-      return isSignedIn() && exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+    // Root Designated Administrative System Owner Bootstrap Check
+    function isTargetOwner() {
+      return isSignedIn() && request.auth.token.email != null && request.auth.token.email.lower() == '309amaanu@gmail.com';
     }
 
-    function isOwner(userId) {
+    function hasUserDoc() {
+      return isSignedIn() && exists(/databases/$(database)/documents/users/$(request.auth.uid));
+    }
+
+    function getUserData() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+
+    function getUserRole() {
+      return hasUserDoc() && ('role' in getUserData()) ? getUserData().role : 'customer';
+    }
+
+    // Role-Based Access Control Tiers
+    function isOwner() {
+      return isTargetOwner() || getUserRole() == 'owner';
+    }
+
+    function isAdmin() {
+      return isOwner() 
+        || getUserRole() in ['super_admin', 'admin', 'procurement_admin'] 
+        || exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+    }
+
+    function isStaff() {
+      return isAdmin() || getUserRole() in ['manager', 'catalog_manager', 'support_admin', 'staff'];
+    }
+
+    function isSelf(userId) {
       return isSignedIn() && request.auth.uid == userId;
     }
 
@@ -35,21 +63,31 @@ service cloud.firestore {
       return resource.data;
     }
 
-    // --- Validation Blueprints ---
+    // --- 3. Schema & Data Validation Functions ---
 
     function isValidProduct(data) {
-      return data.name is string && data.name.size() >= 3 && data.name.size() <= 200
-        && data.slug is string && data.slug.matches('^[a-z0-9-]+$')
-        && data.sku is string && data.sku.size() <= 50
+      return data.name is string && data.name.size() >= 2 && data.name.size() <= 250
+        && data.slug is string && data.slug.size() >= 2 && data.slug.size() <= 250
+        && data.sku is string && data.sku.size() <= 100
         && data.categoryId is string
         && data.brandId is string
         && (data.price == null || data.price is number)
-        && (data.currency == null || data.currency.matches('^[A-Z]{3}$'));
+        && (data.stock == null || data.stock is number);
+    }
+
+    function isValidCategory(data) {
+      return data.name is string && data.name.size() >= 2 && data.name.size() <= 150
+        && data.slug is string && data.slug.size() >= 2;
+    }
+
+    function isValidBrand(data) {
+      return data.name is string && data.name.size() >= 2 && data.name.size() <= 150
+        && data.slug is string && data.slug.size() >= 2;
     }
 
     function isValidEnquiry(data) {
-      return data.type in ['bulk', 'project', 'cable', 'quote']
-        && data.status in ['pending', 'reviewing', 'quoted', 'closed']
+      return data.type in ['bulk', 'project', 'cable', 'quote', 'bulk-quote', 'general']
+        && data.status in ['pending', 'reviewing', 'reviewed', 'quoted', 'responded', 'closed']
         && data.customerInfo is map
         && data.data is map
         && data.userId == request.auth.uid;
@@ -58,55 +96,172 @@ service cloud.firestore {
     function isValidUserProfile(data) {
       return data.uid == request.auth.uid
         && data.email is string
-        && data.role in ['customer', 'admin'];
+        && data.role in [
+          'owner', 'super_admin', 'admin', 'manager', 
+          'procurement_admin', 'catalog_manager', 'support_admin', 
+          'staff', 'viewer', 'customer'
+        ];
     }
 
-    // --- Collections ---
+    function isValidAuditLog(data) {
+      return data.adminUid == request.auth.uid
+        && data.adminName is string
+        && data.action in [
+          'create', 'update', 'delete', 'export', 'status_change', 
+          'login', 'logout', 'auth_failure', 'owner_bootstrap', 
+          'role_assignment', 'suspension'
+        ]
+        && data.targetResource in [
+          'products', 'categories', 'brands', 'enquiries', 
+          'users', 'settings', 'security'
+        ]
+        && data.details is string;
+    }
 
+    function isValidOrder(data) {
+      return data.userId == request.auth.uid
+        && data.status in ['draft', 'submitted', 'processing', 'shipped', 'delivered', 'cancelled']
+        && data.totalAmount is number
+        && data.currency is string;
+    }
+
+    function isValidStockMovement(data) {
+      return data.productId is string
+        && data.sku is string
+        && data.quantityChange is number
+        && data.movementType in ['restock', 'sale_fulfillment', 'damage', 'customer_return', 'audit_adjustment', 'reservation']
+        && data.reason is string
+        && data.recordedByUid == request.auth.uid;
+    }
+
+    function isValidSupplier(data) {
+      return data.companyName is string && data.companyName.size() >= 2
+        && data.contactEmail is string;
+    }
+
+    // --- 4. Collection Access Rules ---
+
+    // Public Industrial Catalog
     match /products/{productId} {
       allow read: if true;
-      allow write: if isAdmin() && isValidProduct(incoming());
+      allow create: if isStaff() && isValidProduct(incoming());
+      allow update: if isStaff() && isValidProduct(incoming()) && (
+        // Only Admins/Owners can modify financial fields
+        (isAdmin() || !incoming().diff(existing()).affectedKeys().hasAny(['price', 'costPrice', 'currency']))
+      );
+      allow delete: if isAdmin();
+    }
+
+    // SKU Registry for Uniqueness Enforcement
+    match /sku_registry/{sku} {
+      allow read: if isStaff();
+      allow create: if isStaff() && incoming().productId is string;
+      allow delete: if isAdmin();
     }
 
     match /categories/{categoryId} {
       allow read: if true;
-      allow write: if isAdmin();
+      allow create: if isStaff() && isValidCategory(incoming());
+      allow update: if isStaff() && isValidCategory(incoming());
+      allow delete: if isAdmin();
     }
 
     match /brands/{brandId} {
       allow read: if true;
-      allow write: if isAdmin();
+      allow create: if isStaff() && isValidBrand(incoming());
+      allow update: if isStaff() && isValidBrand(incoming());
+      allow delete: if isAdmin();
     }
 
+    // Customer RFQs & Enquiries
     match /enquiries/{enquiryId} {
-      allow read: if isAdmin() || (isSignedIn() && existing().userId == request.auth.uid);
+      allow read: if isStaff() || (isSignedIn() && existing().userId == request.auth.uid);
       allow create: if isSignedIn() && isValidEnquiry(incoming()) && incoming().status == 'pending';
-      allow update: if isAdmin() || (
-        isSignedIn() && existing().userId == request.auth.uid 
+      allow update: if isStaff() || (
+        isSignedIn() 
+        && existing().userId == request.auth.uid 
         && isValidEnquiry(incoming())
-        && incoming().status == existing().status // Customer cannot change status
+        && incoming().status == existing().status // Customer cannot alter status
         && incoming().diff(existing()).affectedKeys().hasOnly(['data', 'customerInfo', 'updatedAt'])
       );
       allow delete: if isAdmin();
     }
 
+    // Enterprise User Profiles & RBAC Management
     match /users/{userId} {
-      allow read: if isAdmin() || isOwner(userId);
-      allow create: if isSignedIn() && isOwner(userId) && isValidUserProfile(incoming()) && incoming().role == 'customer';
-      allow update: if isAdmin() || (
-        isOwner(userId) 
-        && isValidUserProfile(incoming())
-        && incoming().role == existing().role // Cannot change own role
-        && incoming().diff(existing()).affectedKeys().hasOnly(['email', 'displayName', 'company', 'phone', 'jobTitle', 'address', 'shippingAddress', 'billingAddress', 'taxId', 'vatNumber', 'wishlist', 'updatedAt'])
+      allow read: if isAdmin() || isSelf(userId);
+      
+      allow create: if isSignedIn() && isSelf(userId) && isValidUserProfile(incoming()) && (
+        isTargetOwner() 
+          ? incoming().role in ['owner', 'admin', 'customer']
+          : incoming().role == 'customer'
       );
+      
+      allow update: if (
+        isOwner()
+      ) || (
+        isAdmin() && existing().role != 'owner' && incoming().role != 'owner'
+      ) || (
+        isSelf(userId)
+        && isValidUserProfile(incoming())
+        && incoming().role == existing().role // Strict role immutability for self updates
+        && incoming().diff(existing()).affectedKeys().hasOnly([
+          'email', 'displayName', 'company', 'phone', 'jobTitle', 
+          'address', 'shippingAddress', 'billingAddress', 'taxId', 
+          'vatNumber', 'wishlist', 'updatedAt'
+        ])
+      );
+
+      // Designated root owner cannot be deleted via Firestore API
+      allow delete: if isOwner() && existing().email.lower() != '309amaanu@gmail.com';
     }
 
+    // Fast Admin Lookup Directory
     match /admins/{adminId} {
       allow read: if isSignedIn();
-      // Allow the first admin to be created if the collection is empty
-      // In production, this should be disabled after setup
-      allow create: if isSignedIn() && isOwner(adminId);
-      allow write: if false;
+      allow create, update, delete: if isOwner() || (isTargetOwner() && request.auth.uid == adminId);
+    }
+
+    // Immutable Security Audit Trail
+    match /admin_audit_logs/{logId} {
+      allow read: if isAdmin();
+      allow create: if isStaff() && isValidAuditLog(incoming());
+      allow update, delete: if false; // Strict immutability
+    }
+
+    // Stock Movement History (Audit Trail)
+    match /stock_movements/{movementId} {
+      allow read: if isStaff();
+      allow create: if isStaff() && isValidStockMovement(incoming());
+      allow update, delete: if false; // Immutable audit trail
+    }
+
+    // Warehouse Inventory Records (Extended)
+    match /inventory_records/{recordId} {
+      allow read: if isStaff();
+      allow create, update: if isStaff();
+      allow delete: if isAdmin();
+    }
+
+    // Customer & B2B Purchase Orders
+    match /orders/{orderId} {
+      allow read: if isStaff() || (isSignedIn() && existing().userId == request.auth.uid);
+      allow create: if isSignedIn() && isValidOrder(incoming());
+      allow update: if isStaff();
+      allow delete: if isAdmin();
+    }
+
+    // Vendor Suppliers Directory
+    match /suppliers/{supplierId} {
+      allow read: if isStaff();
+      allow create, update: if isAdmin() && isValidSupplier(incoming());
+      allow delete: if isOwner();
+    }
+
+    // Global System & Operational Settings
+    match /system_settings/{settingId} {
+      allow read: if isStaff();
+      allow write: if isOwner();
     }
   }
 }

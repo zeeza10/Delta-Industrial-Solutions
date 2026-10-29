@@ -22,6 +22,7 @@ const baseProducts: any[] = [
     specifications: { 'Rated Current': '630A', 'Breaking Capacity': '50kA', 'Poles': '3P' },
     stock: 12,
     isAvailable: true,
+    status: 'active',
     tags: ['featured', 'circuit-protection', 'mccb'],
     createdAt: '2026-10-01T00:00:00Z',
     updatedAt: '2026-10-01T00:00:00Z'
@@ -40,6 +41,7 @@ const baseProducts: any[] = [
     specifications: { 'Current': '16A', 'Tripping Curve': 'Type C', 'Poles': '3P' },
     stock: 150,
     isAvailable: true,
+    status: 'active',
     tags: ['mcb', 'circuit-protection'],
     createdAt: '2026-10-01T00:00:00Z',
     updatedAt: '2026-10-01T00:00:00Z'
@@ -58,6 +60,7 @@ const baseProducts: any[] = [
     specifications: { 'Processing Time': '10ns', 'IO Capacity': 'Up to 32 modules', 'Communication': 'Profinet' },
     stock: 5,
     isAvailable: true,
+    status: 'active',
     tags: ['featured', 'automation', 'plcs'],
     createdAt: '2026-10-01T00:00:00Z',
     updatedAt: '2026-10-01T00:00:00Z'
@@ -76,6 +79,7 @@ const baseProducts: any[] = [
     specifications: { 'Cross Section': '240mm²', 'Voltage Rating': '1kV', 'Insulation': 'XLPE' },
     stock: 8,
     isAvailable: true,
+    status: 'active',
     tags: ['cables', 'heavy-duty', 'power-cables'],
     createdAt: '2026-10-01T00:00:00Z',
     updatedAt: '2026-10-01T00:00:00Z'
@@ -94,6 +98,7 @@ const baseProducts: any[] = [
     specifications: { 'Power': '150W', 'Luminous Flux': '18,000 lm', 'IP Rating': 'IP66' },
     stock: 45,
     isAvailable: true,
+    status: 'active',
     tags: ['featured', 'lighting', 'industrial-led'],
     createdAt: '2026-10-01T00:00:00Z',
     updatedAt: '2026-10-01T00:00:00Z'
@@ -146,6 +151,7 @@ CATEGORIES.forEach(cat => {
           },
           stock: 20 + (counter % 120),
           isAvailable: true,
+          status: 'active',
           tags: [catId, sub.id, counter % 3 === 0 ? 'featured' : 'standard', 'industrial'],
           createdAt: '2026-10-01T00:00:00Z',
           updatedAt: '2026-10-01T00:00:00Z'
@@ -177,6 +183,7 @@ CATEGORIES.forEach(cat => {
         },
         stock: 15 + (counter % 80),
         isAvailable: true,
+        status: 'active',
         tags: [catId, 'featured', 'industrial'],
         createdAt: '2026-10-01T00:00:00Z',
         updatedAt: '2026-10-01T00:00:00Z'

@@ -22,8 +22,26 @@ export const getFeaturedProducts = async (count = 4) => {
   try {
     const q = query(
       collection(db, path),
+      where('status', '==', 'active'),
       where('tags', 'array-contains', 'featured'),
       limit(count)
+    );
+    const snap = await getDocs(q);
+    return snap.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Product[];
+  } catch (error) {
+    handleFirestoreError(error, OperationType.LIST, path);
+    return [];
+  }
+};
+
+export const getAllProducts = async () => {
+  if (!db) return [];
+  const path = 'products';
+  try {
+    const q = query(
+      collection(db, path),
+      where('status', '==', 'active'),
+      limit(200)
     );
     const snap = await getDocs(q);
     return snap.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Product[];
@@ -39,6 +57,7 @@ export const getProductsByCategory = async (categoryId: string, limitCount = 20)
   try {
     const q = query(
       collection(db, path),
+      where('status', '==', 'active'),
       where('categoryId', '==', categoryId),
       limit(limitCount)
     );
@@ -56,6 +75,7 @@ export const getProductBySlug = async (slug: string) => {
   try {
     const q = query(
       collection(db, path),
+      where('status', '==', 'active'),
       where('slug', '==', slug),
       limit(1)
     );

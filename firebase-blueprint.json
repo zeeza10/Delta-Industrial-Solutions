@@ -1,114 +1,300 @@
 {
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "version": "1.0.0",
+  "description": "Enterprise Firestore Architecture Blueprint for Delta Industrial Solutions — VIP Admin Control Center",
   "entities": {
     "Product": {
-      "title": "Product",
-      "description": "Industrial electrical product record",
-      "type": "object",
-      "properties": {
-        "id": { "type": "string" },
-        "name": { "type": "string", "minLength": 3, "maxLength": 200 },
-        "slug": { "type": "string", "pattern": "^[a-z0-9-]+$" },
-        "description": { "type": "string", "maxLength": 5000 },
-        "price": { "type": "number" },
-        "currency": { "type": "string", "pattern": "^[A-Z]{3}$" },
-        "sku": { "type": "string", "maxLength": 50 },
-        "categoryId": { "type": "string" },
-        "brandId": { "type": "string" },
-        "images": { "type": "array" },
-        "specifications": { "type": "object" },
-        "stock": { "type": "number" },
-        "isAvailable": { "type": "boolean" },
-        "tags": { "type": "array" },
-        "createdAt": { "type": "string", "format": "date-time" },
-        "updatedAt": { "type": "string", "format": "date-time" }
-      },
-      "required": ["name", "slug", "sku", "categoryId", "brandId"]
+      "name": "Product",
+      "description": "Industrial product catalog item with specs, stock, pricing, and categorizations",
+      "fields": {
+        "id": { "type": "string", "required": true, "description": "Unique product identifier" },
+        "name": { "type": "string", "required": true, "description": "Display name of the industrial product" },
+        "slug": { "type": "string", "required": true, "description": "URL-friendly slug identifier" },
+        "description": { "type": "string", "required": true, "description": "Technical product specifications and description" },
+        "price": { "type": "number", "required": true, "description": "Base unit price" },
+        "currency": { "type": "string", "required": true, "description": "ISO 4217 Currency Code (e.g., USD)" },
+        "sku": { "type": "string", "required": true, "description": "Stock Keeping Unit code" },
+        "categoryId": { "type": "string", "required": true, "description": "Associated Category ID" },
+        "brandId": { "type": "string", "required": true, "description": "Associated Brand ID" },
+        "images": { "type": "array", "required": true, "items": { "type": "string" }, "description": "Array of product image URLs" },
+        "specifications": { "type": "object", "required": false, "description": "Key-value pair map of technical specifications" },
+        "stock": { "type": "number", "required": true, "description": "Available inventory quantity" },
+        "isAvailable": { "type": "boolean", "required": true, "description": "Availability flag" },
+        "tags": { "type": "array", "required": false, "items": { "type": "string" }, "description": "Search and classification tags" },
+        "createdAt": { "type": "string", "required": true, "description": "ISO timestamp of creation" },
+        "updatedAt": { "type": "string", "required": true, "description": "ISO timestamp of last update" }
+      }
     },
     "Category": {
-      "title": "Category",
-      "description": "Product category taxonomy",
-      "type": "object",
-      "properties": {
-        "id": { "type": "string" },
-        "name": { "type": "string" },
-        "slug": { "type": "string" },
-        "parentId": { "type": "string" },
-        "description": { "type": "string" },
-        "image": { "type": "string" }
-      },
-      "required": ["name", "slug"]
+      "name": "Category",
+      "description": "Product taxonomy category hierarchy",
+      "fields": {
+        "id": { "type": "string", "required": true, "description": "Category identifier" },
+        "name": { "type": "string", "required": true, "description": "Category title" },
+        "slug": { "type": "string", "required": true, "description": "Category URL slug" },
+        "description": { "type": "string", "required": false, "description": "Category overview" },
+        "parentId": { "type": "string", "required": false, "description": "Parent category ID for nested subcategories" },
+        "image": { "type": "string", "required": false, "description": "Category banner/thumbnail image URL" }
+      }
     },
     "Brand": {
-      "title": "Brand",
-      "description": "Manufacturer brand",
-      "type": "object",
-      "properties": {
-        "id": { "type": "string" },
-        "name": { "type": "string" },
-        "logo": { "type": "string" },
-        "description": { "type": "string" }
-      },
-      "required": ["name"]
+      "name": "Brand",
+      "description": "Manufacturer or brand profile",
+      "fields": {
+        "id": { "type": "string", "required": true, "description": "Brand identifier" },
+        "name": { "type": "string", "required": true, "description": "Brand name" },
+        "slug": { "type": "string", "required": true, "description": "Brand slug" },
+        "logo": { "type": "string", "required": false, "description": "Brand logo URL" },
+        "description": { "type": "string", "required": false, "description": "Brand background details" }
+      }
     },
     "Enquiry": {
-      "title": "Enquiry",
-      "description": "B2B procurement enquiry (Bulk, Project, Cable, or Quote)",
-      "type": "object",
-      "properties": {
-        "id": { "type": "string" },
-        "type": { "type": "string", "enum": ["bulk", "project", "cable", "quote"] },
-        "userId": { "type": "string" },
-        "status": { "type": "string", "enum": ["pending", "reviewing", "quoted", "closed"] },
-        "customerInfo": { "type": "object" },
-        "data": { "type": "object" },
-        "createdAt": { "type": "string", "format": "date-time" },
-        "updatedAt": { "type": "string", "format": "date-time" }
-      },
-      "required": ["type", "status", "customerInfo", "data"]
+      "name": "Enquiry",
+      "description": "Customer Request for Quotation (RFQ) or technical enquiry",
+      "fields": {
+        "id": { "type": "string", "required": true, "description": "Enquiry document ID" },
+        "userId": { "type": "string", "required": true, "description": "Submitting user UID" },
+        "type": { 
+          "type": "string", 
+          "required": true, 
+          "enum": ["project", "cable", "bulk-quote", "bulk", "general", "quote"],
+          "description": "Type of engineering enquiry" 
+        },
+        "status": { 
+          "type": "string", 
+          "required": true, 
+          "enum": ["pending", "reviewing", "reviewed", "quoted", "responded", "closed"],
+          "description": "Current status of enquiry workflow" 
+        },
+        "customerInfo": { "type": "object", "required": true, "description": "Contact info object (name, email, company, phone, region)" },
+        "data": { "type": "object", "required": true, "description": "Payload specific to enquiry type (line items, specs, notes, attachments)" },
+        "createdAt": { "type": "string", "required": true, "description": "ISO timestamp or serverTimestamp" },
+        "updatedAt": { "type": "string", "required": true, "description": "ISO timestamp or serverTimestamp" }
+      }
     },
     "UserProfile": {
-      "title": "User Profile",
-      "description": "Authenticated user profile and role",
-      "type": "object",
-      "properties": {
-        "uid": { "type": "string" },
-        "email": { "type": "string" },
-        "displayName": { "type": "string" },
-        "role": { "type": "string", "enum": ["customer", "admin"] },
-        "company": { "type": "string" },
-        "phone": { "type": "string" },
-        "jobTitle": { "type": "string" },
-        "taxId": { "type": "string" },
-        "shippingAddress": { "type": "object" },
-        "billingAddress": { "type": "object" }
-      },
-      "required": ["uid", "email", "role"]
+      "name": "UserProfile",
+      "description": "Customer and Admin user profiles with RBAC role authorization",
+      "fields": {
+        "uid": { "type": "string", "required": true, "description": "Firebase Auth User UID" },
+        "email": { "type": "string", "required": true, "description": "User email address" },
+        "displayName": { "type": "string", "required": false, "description": "User full display name" },
+        "role": { 
+          "type": "string", 
+          "required": true, 
+          "enum": ["owner", "super_admin", "admin", "manager", "procurement_admin", "catalog_manager", "support_admin", "staff", "viewer", "customer"],
+          "description": "RBAC system authorization role" 
+        },
+        "company": { "type": "string", "required": false, "description": "User company or organization name" },
+        "phone": { "type": "string", "required": false, "description": "Primary phone contact" },
+        "jobTitle": { "type": "string", "required": false, "description": "Professional position title" },
+        "taxId": { "type": "string", "required": false, "description": "Corporate Tax Identification Number" },
+        "vatNumber": { "type": "string", "required": false, "description": "VAT Registration Number" },
+        "shippingAddress": { "type": "object", "required": false, "description": "Primary shipping address" },
+        "billingAddress": { "type": "object", "required": false, "description": "Corporate billing address" },
+        "wishlist": { "type": "array", "required": false, "items": { "type": "string" }, "description": "Array of saved product IDs" },
+        "createdAt": { "type": "string", "required": false, "description": "ISO creation timestamp" },
+        "updatedAt": { "type": "string", "required": false, "description": "ISO update timestamp" }
+      }
+    },
+    "AdminLookup": {
+      "name": "AdminLookup",
+      "description": "Fast index collection mapping active staff and admin UIDs",
+      "fields": {
+        "uid": { "type": "string", "required": true, "description": "Admin UID" },
+        "email": { "type": "string", "required": true, "description": "Admin email address" },
+        "role": { "type": "string", "required": true, "description": "Admin role designation" },
+        "updatedAt": { "type": "string", "required": true, "description": "ISO update timestamp" }
+      }
+    },
+    "AuditLog": {
+      "name": "AuditLog",
+      "description": "Immutable administrative audit trail log",
+      "fields": {
+        "id": { "type": "string", "required": true, "description": "Log entry ID" },
+        "adminUid": { "type": "string", "required": true, "description": "Actor UID" },
+        "adminName": { "type": "string", "required": true, "description": "Actor display name or email" },
+        "action": { 
+          "type": "string", 
+          "required": true, 
+          "enum": ["create", "update", "delete", "export", "status_change", "login", "logout", "auth_failure", "owner_bootstrap", "role_assignment", "suspension"],
+          "description": "Event action type" 
+        },
+        "targetResource": { 
+          "type": "string", 
+          "required": true, 
+          "enum": ["products", "categories", "brands", "enquiries", "users", "settings", "security"],
+          "description": "Target entity collection" 
+        },
+        "resourceId": { "type": "string", "required": false, "description": "Target document ID" },
+        "details": { "type": "string", "required": true, "description": "Human-readable action description" },
+        "timestamp": { "type": "string", "required": true, "description": "ISO action timestamp" }
+      }
+    },
+    "InventoryMovement": {
+      "name": "InventoryMovement",
+      "description": "Warehouse inventory adjustments and stock movements",
+      "fields": {
+        "id": { "type": "string", "required": true, "description": "Movement record ID" },
+        "productId": { "type": "string", "required": true, "description": "Target product ID" },
+        "quantityChange": { "type": "number", "required": true, "description": "Positive or negative stock delta" },
+        "reason": { "type": "string", "required": true, "description": "Adjustment reason (e.g. restock, order, damage, audit)" },
+        "recordedBy": { "type": "string", "required": true, "description": "Staff UID who recorded adjustment" },
+        "createdAt": { "type": "string", "required": true, "description": "ISO timestamp" }
+      }
+    },
+    "Order": {
+      "name": "Order",
+      "description": "B2B Storefront purchase orders",
+      "fields": {
+        "id": { "type": "string", "required": true, "description": "Order ID or PO number" },
+        "userId": { "type": "string", "required": true, "description": "Purchasing customer user UID" },
+        "status": { 
+          "type": "string", 
+          "required": true, 
+          "enum": ["draft", "submitted", "processing", "shipped", "delivered", "cancelled"],
+          "description": "Order fulfillment status" 
+        },
+        "totalAmount": { "type": "number", "required": true, "description": "Total order cost" },
+        "currency": { "type": "string", "required": true, "description": "Currency ISO code" },
+        "shippingAddress": { "type": "object", "required": true, "description": "Destination address" },
+        "createdAt": { "type": "string", "required": true, "description": "ISO creation timestamp" },
+        "updatedAt": { "type": "string", "required": true, "description": "ISO update timestamp" }
+      }
+    },
+    "Supplier": {
+      "name": "Supplier",
+      "description": "Industrial vendor and distributor directory",
+      "fields": {
+        "id": { "type": "string", "required": true, "description": "Supplier ID" },
+        "companyName": { "type": "string", "required": true, "description": "Vendor company name" },
+        "contactEmail": { "type": "string", "required": true, "description": "Primary sales email" },
+        "rating": { "type": "number", "required": false, "description": "Vendor rating (1-5)" },
+        "categories": { "type": "array", "items": { "type": "string" }, "required": false, "description": "Supplied category IDs" }
+      }
+    },
+    "SystemSetting": {
+      "name": "SystemSetting",
+      "description": "Global store and administrative system parameters",
+      "fields": {
+        "id": { "type": "string", "required": true, "description": "Setting key identifier" },
+        "value": { "type": "object", "required": true, "description": "Setting configuration payload" },
+        "updatedBy": { "type": "string", "required": true, "description": "Admin UID who last saved setting" },
+        "updatedAt": { "type": "string", "required": true, "description": "ISO timestamp" }
+      }
     }
   },
-  "firestore": {
-    "/products/{productId}": {
-      "schema": "Product",
-      "description": "Global product catalog"
+  "collections": {
+    "products": {
+      "entity": "Product",
+      "path": "/products/{productId}",
+      "description": "Industrial product catalog documents",
+      "accessRules": {
+        "read": "public",
+        "create": "staff",
+        "update": "staff",
+        "delete": "admin"
+      }
     },
-    "/categories/{categoryId}": {
-      "schema": "Category",
-      "description": "Product categories"
+    "categories": {
+      "entity": "Category",
+      "path": "/categories/{categoryId}",
+      "description": "Taxonomy categories",
+      "accessRules": {
+        "read": "public",
+        "write": "staff"
+      }
     },
-    "/brands/{brandId}": {
-      "schema": "Brand",
-      "description": "Manufacturer brands"
+    "brands": {
+      "entity": "Brand",
+      "path": "/brands/{brandId}",
+      "description": "Manufacturer brands",
+      "accessRules": {
+        "read": "public",
+        "write": "staff"
+      }
     },
-    "/enquiries/{enquiryId}": {
-      "schema": "Enquiry",
-      "description": "Procurement enquiries"
+    "enquiries": {
+      "entity": "Enquiry",
+      "path": "/enquiries/{enquiryId}",
+      "description": "Quotations and technical engineering requests",
+      "accessRules": {
+        "read": "owner_or_staff",
+        "create": "authenticated",
+        "update": "owner_or_staff",
+        "delete": "admin"
+      }
     },
-    "/users/{userId}": {
-      "schema": "UserProfile",
-      "description": "User profiles and RBAC"
+    "users": {
+      "entity": "UserProfile",
+      "path": "/users/{userId}",
+      "description": "User accounts and role metadata",
+      "accessRules": {
+        "read": "self_or_admin",
+        "create": "self_or_target_owner",
+        "update": "owner_or_admin_or_self_immutable_role",
+        "delete": "owner_only"
+      }
     },
-    "/admins/{adminId}": {
-      "schema": { "type": "object", "properties": {} },
-      "description": "List of admin UIDs for secure rule validation"
+    "admins": {
+      "entity": "AdminLookup",
+      "path": "/admins/{adminId}",
+      "description": "Active administrator lookup index",
+      "accessRules": {
+        "read": "authenticated",
+        "write": "owner_only"
+      }
+    },
+    "admin_audit_logs": {
+      "entity": "AuditLog",
+      "path": "/admin_audit_logs/{logId}",
+      "description": "Immutable security and operational audit trail",
+      "accessRules": {
+        "read": "admin",
+        "create": "staff",
+        "update": "none",
+        "delete": "none"
+      }
+    },
+    "inventory": {
+      "entity": "InventoryMovement",
+      "path": "/inventory/{movementId}",
+      "description": "Stock adjustment and inventory tracking",
+      "accessRules": {
+        "read": "staff",
+        "create": "staff",
+        "update": "none",
+        "delete": "none"
+      }
+    },
+    "orders": {
+      "entity": "Order",
+      "path": "/orders/{orderId}",
+      "description": "B2B customer purchase orders",
+      "accessRules": {
+        "read": "owner_or_staff",
+        "create": "authenticated",
+        "update": "staff",
+        "delete": "admin"
+      }
+    },
+    "suppliers": {
+      "entity": "Supplier",
+      "path": "/suppliers/{supplierId}",
+      "description": "Industrial vendor supplier directory",
+      "accessRules": {
+        "read": "staff",
+        "write": "admin"
+      }
+    },
+    "system_settings": {
+      "entity": "SystemSetting",
+      "path": "/system_settings/{settingId}",
+      "description": "Global application environment configurations",
+      "accessRules": {
+        "read": "staff",
+        "write": "owner"
+      }
     }
   }
 }

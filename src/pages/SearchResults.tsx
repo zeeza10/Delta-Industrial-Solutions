@@ -14,7 +14,7 @@ import { BRANDS } from '../data/brands';
 import { searchProducts, SortOption, FilterOptions } from '../utils/search';
 import { SortAsc, LayoutGrid, List, X, ChevronDown, Filter } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import { getBrands } from '../utils/dbQueries';
+import { getBrands, getAllProducts } from '../utils/dbQueries';
 import { Product, Brand } from '../types';
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from '../lib/firebase';
@@ -30,8 +30,7 @@ export const SearchResults: React.FC = () => {
     const fetchAllData = async () => {
       try {
         if (db) {
-          const snap = await getDocs(collection(db, 'products'));
-          const products = snap.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Product[];
+          const products = await getAllProducts();
           if (products.length > 0) setAllProducts(products);
           
           const brands = await getBrands();

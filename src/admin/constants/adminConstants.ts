@@ -34,6 +34,7 @@ export const ADMIN_NAV_GROUPS: AdminNavGroup[] = [
     label: 'Business Operations',
     items: [
       { id: 'enquiries', name: 'B2B Procurement RFQs', path: '/admin/enquiries', iconName: 'MessageSquare', badge: 'Active' },
+      { id: 'gmail', name: 'Gmail Communications', path: '/admin/gmail', iconName: 'Mail', badge: '1P OAuth' },
     ],
   },
   {
@@ -41,8 +42,17 @@ export const ADMIN_NAV_GROUPS: AdminNavGroup[] = [
     label: 'Catalog Management',
     items: [
       { id: 'products', name: 'Products & SKUs', path: '/admin/products', iconName: 'Package' },
+      { id: 'inventory', name: 'Inventory & Stock', path: '/admin/inventory', iconName: 'History' },
       { id: 'categories', name: 'Taxonomies', path: '/admin/categories', iconName: 'Layers' },
       { id: 'brands', name: 'OEM Partners', path: '/admin/brands', iconName: 'Tag' },
+    ],
+  },
+  {
+    id: 'cms',
+    label: 'Content & Media',
+    items: [
+      { id: 'cms_pages', name: 'CMS Pages', path: '/admin/cms', iconName: 'FileText' },
+      { id: 'media_library', name: 'Media Library', path: '/admin/media', iconName: 'ImageIcon' },
     ],
   },
   {

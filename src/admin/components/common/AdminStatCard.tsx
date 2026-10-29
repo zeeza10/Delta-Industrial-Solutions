@@ -13,6 +13,11 @@ import {
   TrendingDown, 
   ShieldCheck,
   AlertCircle,
+  DollarSign,
+  ShoppingBag,
+  FileText,
+  AlertTriangle,
+  Truck,
   LucideIcon 
 } from 'lucide-react';
 import { AdminMetricSummary } from '../../types/admin.types';
@@ -23,6 +28,11 @@ const iconMap: Record<string, LucideIcon> = {
   Users,
   Clock,
   ShieldCheck,
+  DollarSign,
+  ShoppingBag,
+  FileText,
+  AlertTriangle,
+  Truck,
 };
 
 interface AdminStatCardProps {

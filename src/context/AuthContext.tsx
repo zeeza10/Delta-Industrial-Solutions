@@ -18,20 +18,26 @@ import {
 } from 'firebase/auth';
 import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
 import { auth, db } from '../lib/firebase';
-import { UserProfile } from '../types';
+import { UserProfile, UserRole } from '../types';
+
+export const TARGET_OWNER_EMAIL = '309amaanu@gmail.com';
 
 export type AuthModalMode = 'signin' | 'register' | 'forgot';
 
-interface AuthResponse {
+export interface AuthResponse {
   success: boolean;
   error?: string;
+  user?: User;
 }
 
 interface AuthContextType {
   user: User | null;
   profile: UserProfile | null;
   loading: boolean;
+  isOwner: boolean;
   isAdmin: boolean;
+  isStaff: boolean;
+  role: UserRole;
   isAuthModalOpen: boolean;
   authModalMode: AuthModalMode;
   openAuthModal: (mode?: AuthModalMode) => void;
@@ -49,6 +55,7 @@ interface AuthContextType {
   sendEmailVerificationLink: () => Promise<AuthResponse>;
   updateUserProfile: (data: Partial<UserProfile>) => Promise<AuthResponse>;
   refreshProfile: () => Promise<void>;
+  claimOwnerRole: () => Promise<AuthResponse>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -63,36 +70,74 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const isSigningInRef = useRef(false);
 
   const fetchProfile = async (currentUser: User) => {
+    const isTargetOwner = currentUser.email?.toLowerCase().trim() === TARGET_OWNER_EMAIL;
+
     if (!db) {
       setProfile({
         uid: currentUser.uid,
         email: currentUser.email || '',
-        displayName: currentUser.displayName || '',
-        role: 'customer',
+        displayName: currentUser.displayName || (isTargetOwner ? 'System Owner' : ''),
+        role: isTargetOwner ? 'owner' : 'customer',
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
       });
       return;
     }
+
     try {
       const profileRef = doc(db, 'users', currentUser.uid);
       const profileSnap = await getDoc(profileRef);
       
       if (profileSnap.exists()) {
-        setProfile(profileSnap.data() as UserProfile);
+        const data = profileSnap.data() as UserProfile;
+        // If the signed-in user is the designated owner, guarantee owner role in profile
+        if (isTargetOwner && data.role !== 'owner') {
+          const updatedProfile: UserProfile = {
+            ...data,
+            role: 'owner',
+            updatedAt: new Date().toISOString(),
+          };
+          try {
+            await setDoc(profileRef, { role: 'owner', updatedAt: new Date().toISOString() }, { merge: true });
+            // Also ensure admin lookup entry exists
+            const adminRef = doc(db, 'admins', currentUser.uid);
+            await setDoc(adminRef, {
+              uid: currentUser.uid,
+              email: currentUser.email,
+              role: 'owner',
+              verifiedAt: new Date().toISOString(),
+            }, { merge: true });
+          } catch (writeErr) {
+            console.warn('Could not sync owner record to Firestore immediately:', writeErr);
+          }
+          setProfile(updatedProfile);
+        } else {
+          setProfile(data);
+        }
       } else {
+        // Initial profile creation
+        const initialRole: UserRole = isTargetOwner ? 'owner' : 'customer';
         const newProfile: UserProfile = {
           uid: currentUser.uid,
           email: currentUser.email || '',
-          displayName: currentUser.displayName || '',
-          role: 'customer',
+          displayName: currentUser.displayName || (isTargetOwner ? 'System Owner' : ''),
+          role: initialRole,
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString()
         };
         try {
           await setDoc(profileRef, newProfile);
+          if (isTargetOwner) {
+            const adminRef = doc(db, 'admins', currentUser.uid);
+            await setDoc(adminRef, {
+              uid: currentUser.uid,
+              email: currentUser.email,
+              role: 'owner',
+              verifiedAt: new Date().toISOString(),
+            }, { merge: true });
+          }
         } catch (e) {
-          // Ignore offline write errors
+          console.warn('Profile write deferred/offline:', e);
         }
         setProfile(newProfile);
       }
@@ -101,8 +146,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setProfile({
         uid: currentUser.uid,
         email: currentUser.email || '',
-        displayName: currentUser.displayName || '',
-        role: 'customer',
+        displayName: currentUser.displayName || (isTargetOwner ? 'System Owner' : ''),
+        role: isTargetOwner ? 'owner' : 'customer',
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
       });
@@ -154,11 +199,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const userCredential = await signInWithPopup(auth, provider);
       
       // Ensure user document exists in Firestore
-      if (userCredential.user && db) {
-        await fetchProfile(userCredential.user);
-      }
       setIsAuthModalOpen(false);
-      return { success: true };
+      return { success: true, user: userCredential.user };
     } catch (err: any) {
       let message = 'Unable to sign in with Google.';
       if (err.code === 'auth/popup-blocked') {
@@ -181,11 +223,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email.trim(), password);
-      if (userCredential.user && db) {
-        await fetchProfile(userCredential.user);
-      }
       setIsAuthModalOpen(false);
-      return { success: true };
+      return { success: true, user: userCredential.user };
     } catch (err: any) {
       let message = 'Failed to sign in. Please check your credentials.';
       if (err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential') {
@@ -350,14 +389,59 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return { success: true };
   };
 
-  const isAdmin = profile?.role === 'admin';
+  const claimOwnerRole = async (): Promise<AuthResponse> => {
+    if (!user || user.email?.toLowerCase().trim() !== TARGET_OWNER_EMAIL) {
+      return { 
+        success: false, 
+        error: `Account ${user?.email || 'unauthenticated'} does not match designated administrative owner (${TARGET_OWNER_EMAIL}).` 
+      };
+    }
+    if (!db) {
+      return { success: false, error: 'Database service is currently unreachable.' };
+    }
+
+    try {
+      const userRef = doc(db, 'users', user.uid);
+      const adminRef = doc(db, 'admins', user.uid);
+      const now = new Date().toISOString();
+
+      await setDoc(userRef, {
+        uid: user.uid,
+        email: user.email,
+        displayName: user.displayName || 'System Owner',
+        role: 'owner',
+        updatedAt: now,
+      }, { merge: true });
+
+      await setDoc(adminRef, {
+        uid: user.uid,
+        email: user.email,
+        role: 'owner',
+        verifiedAt: now,
+      }, { merge: true });
+
+      await fetchProfile(user);
+      return { success: true };
+    } catch (err: any) {
+      console.error('Failed to provision owner record:', err);
+      return { success: false, error: err.message || 'Failed to claim owner authorization.' };
+    }
+  };
+
+  const isOwner = (profile?.role === 'owner') || (user?.email?.toLowerCase().trim() === TARGET_OWNER_EMAIL);
+  const isAdmin = isOwner || profile?.role === 'admin' || profile?.role === 'manager';
+  const isStaff = isAdmin;
+  const role: UserRole = profile?.role || (isOwner ? 'owner' : 'customer');
 
   return (
     <AuthContext.Provider value={{ 
       user, 
       profile, 
       loading, 
+      isOwner,
       isAdmin, 
+      isStaff,
+      role,
       isAuthModalOpen,
       authModalMode,
       openAuthModal,
@@ -370,7 +454,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       resetPassword,
       sendEmailVerificationLink,
       updateUserProfile,
-      refreshProfile
+      refreshProfile,
+      claimOwnerRole
     }}>
       {children}
     </AuthContext.Provider>

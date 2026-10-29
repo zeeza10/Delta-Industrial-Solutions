@@ -23,19 +23,21 @@ interface AdminContextValue {
 }
 
 const defaultCapabilities: AdminUserCapability = {
-  canManageProducts: true,
-  canManagePricing: true,
-  canManageEnquiries: true,
-  canManageUsers: true,
-  canManageSettings: true,
-  canViewFinancials: true,
-  canExportReports: true,
+  canManageProducts: false,
+  canManagePricing: false,
+  canManageEnquiries: false,
+  canManageUsers: false,
+  canAssignRoles: false,
+  canManageSettings: false,
+  canViewFinancials: false,
+  canExportReports: false,
+  canDeleteLogs: false,
 };
 
 const AdminContext = createContext<AdminContextValue | undefined>(undefined);
 
 export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { user, profile } = useAuth();
+  const { user, profile, isOwner, role } = useAuth();
   const [isSidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -47,10 +49,54 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const closeMobileMenu = useCallback(() => setIsMobileMenuOpen(false), []);
 
   const adminRole: AdminRole = useMemo(() => {
-    return profile?.role === 'admin' ? 'super_admin' : 'support_admin';
-  }, [profile?.role]);
+    if (isOwner) return 'owner';
+    if (role === 'admin') return 'super_admin';
+    if (role === 'manager') return 'procurement_admin';
+    return 'support_admin';
+  }, [isOwner, role]);
 
-  const capabilities = useMemo(() => defaultCapabilities, []);
+  const capabilities: AdminUserCapability = useMemo(() => {
+    if (isOwner) {
+      return {
+        canManageProducts: true,
+        canManagePricing: true,
+        canManageEnquiries: true,
+        canManageUsers: true,
+        canAssignRoles: true,
+        canManageSettings: true,
+        canViewFinancials: true,
+        canExportReports: true,
+        canDeleteLogs: true,
+      };
+    }
+    if (role === 'admin') {
+      return {
+        canManageProducts: true,
+        canManagePricing: true,
+        canManageEnquiries: true,
+        canManageUsers: true,
+        canAssignRoles: false,
+        canManageSettings: false,
+        canViewFinancials: true,
+        canExportReports: true,
+        canDeleteLogs: false,
+      };
+    }
+    if (role === 'manager') {
+      return {
+        canManageProducts: true,
+        canManagePricing: false,
+        canManageEnquiries: true,
+        canManageUsers: false,
+        canAssignRoles: false,
+        canManageSettings: false,
+        canViewFinancials: false,
+        canExportReports: true,
+        canDeleteLogs: false,
+      };
+    }
+    return defaultCapabilities;
+  }, [isOwner, role]);
 
   const [systemHealth, setSystemHealth] = useState<SystemHealthStatus>({
     databaseStatus: db ? 'checking' : 'unconfigured',
